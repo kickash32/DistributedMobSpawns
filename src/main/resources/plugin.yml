@@ -1,0 +1,9 @@
+name: DistributedMobSpawns
+version: 1.0
+main: me.kickash32.distributedmobspawns.DistributedMobSpawns
+commands:
+  dms:
+    description: Configure and test DistributedMobSpawns
+    usage: use /dms help to view commands
+    permission: dms.debug
+    permission-message: You don't have dms.debug
