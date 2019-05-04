@@ -24,12 +24,12 @@ public class CmdExecutor implements CommandExecutor {
         String subCmd = args[0].toLowerCase();
 
         switch (subCmd) {
+            case "setbuffer": return onSetBufferCommand(sender, args);
             case "butcher": return onButcherCommand(sender);
             case "stats": onDebugCommand(sender);
             case "help": onHelpCommand(sender);
             case "reload": onReloadCommand(sender);
             case "toggle": onToggleCommand(sender);
-            case "setbuffer": return onSetBufferCommand(sender, args);
             default:
                 sender.sendMessage("Unknown command");
                 onHelpCommand(sender);
@@ -42,15 +42,6 @@ public class CmdExecutor implements CommandExecutor {
         return controller.setBuffer(Integer.parseInt(args[1]));
     }
 
-    private void onReloadCommand(CommandSender sender) {
-        controller.reloadConfig();
-        sender.sendMessage("[DMS] reload complete");
-    }
-
-    private void onToggleCommand(CommandSender sender) {
-        sender.sendMessage("[DMS] Enforcement is now: " + !controller.toggleDisabled());
-    }
-
     private boolean onButcherCommand(CommandSender sender) {
         if(!(sender instanceof Player)){ return false; }
         else
@@ -61,14 +52,24 @@ public class CmdExecutor implements CommandExecutor {
         return true;
     }
 
+    private void onReloadCommand(CommandSender sender) {
+        controller.reloadConfig();
+        sender.sendMessage("[DMS] reload complete");
+    }
+
+    private void onToggleCommand(CommandSender sender) {
+        sender.sendMessage("[DMS] Enforcement is now: " + !controller.toggleDisabled());
+    }
+
+
     private void onHelpCommand(CommandSender sender){
         sender.sendMessage("[DMS] command list");
         sender.sendMessage("butcher: kill all monsters");
+        sender.sendMessage("setbuffer: change the variance of the mobcap");
         sender.sendMessage("stats: view distribution of monsters");
         sender.sendMessage("help: view command info");
         sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
-        sender.sendMessage("setbuffer: change the variance of the mobcap");
     }
     private void onDebugCommand(CommandSender sender){
         ArrayList<String> msgs = new ArrayList<>();
