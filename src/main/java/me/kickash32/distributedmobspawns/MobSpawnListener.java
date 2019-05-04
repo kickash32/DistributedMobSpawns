@@ -132,7 +132,7 @@ public class MobSpawnListener implements Listener {
     }
 
     public static boolean isMonster(Entity entity){
-        return entity instanceof Monster ||
+        return (entity instanceof Monster && !(entity instanceof ElderGuardian)) ||
                         entity instanceof Slime ||
                         entity instanceof Ghast;
     }
