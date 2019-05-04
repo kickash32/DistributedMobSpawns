@@ -133,16 +133,15 @@ public class MobSpawnListener implements Listener {
     }
 
     public static boolean isMonster(Entity entity){
-        return (entity instanceof Monster && !(entity instanceof ElderGuardian)) ||
-                        entity instanceof Slime ||
-                        entity instanceof Ghast;
+        return isMonster(entity.getType());
     }
 
     public static boolean isMonster(EntityType type){
         Class c = type.getEntityClass();
-        return Monster.class.isAssignableFrom(c)||
+        return (Monster.class.isAssignableFrom(c)||
                 Slime.class.isAssignableFrom(c)||
-                Ghast.class.isAssignableFrom(c);
+                Ghast.class.isAssignableFrom(c)) &&
+                !ElderGuardian.class.isAssignableFrom(c);
     }
 
 //    public static boolean isAnimal(EntityType type){//TO DO
