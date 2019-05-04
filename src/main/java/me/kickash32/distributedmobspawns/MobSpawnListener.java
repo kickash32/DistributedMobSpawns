@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,16 +54,17 @@ public class MobSpawnListener implements Listener {
         //get Chunk info
         Chunk chunk;
         for(int i = -radius; i <= radius; i++){
-            for(int k = -radius; k <= radius; k++){
+            for(int k = -radius; k <= radius; k++) {
+                //ignore chunks that are more than 128 blocks away
+                if (i * i + k * k >= (8 + 1) * (8 + 1)) { continue; }
                 int chunkX = i + ii;
                 int chunkZ = k + kk;
-
-                if(!world.isChunkLoaded(chunkX, chunkZ)){ continue; }
+                if (!world.isChunkLoaded(chunkX, chunkZ)) { continue; }
 
                 chunk = world.getChunkAt(chunkX, chunkZ);
                 playerChunks.add(chunkX, chunkZ);
-                for(Entity entity : chunk.getEntities()){
-                    if(isMonster(entity)) {
+                for (Entity entity : chunk.getEntities()) {
+                    if (isMonster(entity)) {
                         monsterCount++;
                     }
                 }
@@ -74,9 +76,7 @@ public class MobSpawnListener implements Listener {
         Long cnk;
         boolean tmp = (double)monsterCount/playerChunks.size() >= densityLimit;
         while (iteration.hasNext()) {
-            cnk = iteration.next();
-            //System
-            if (tmp) {
+            cnk = iteration.next();if (tmp) {
                 chunksFull.add(cnk);
             }
             else{
@@ -87,6 +87,7 @@ public class MobSpawnListener implements Listener {
         }
     }
 
+    //event broken in paper 1.13.1
 //    @EventHandler
 //    public void onPreCreatureSpawnEvent(PreCreatureSpawnEvent event) {
 //        controller.serverPaperDetected();
@@ -108,7 +109,7 @@ public class MobSpawnListener implements Listener {
 
     @EventHandler
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
-        //if(controller.runningOnPaper()){ return; }
+        //if(controller.runningOnPaper()){ return; }//disabled due to paper onPreCreatureSpawnEvent broken
         if (controller.isDisabled()){ return; }
         if (!event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)){ return; }
         if(!isMonster(event.getEntityType())){ return; }
