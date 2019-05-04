@@ -1,7 +1,6 @@
 package me.kickash32.distributedmobspawns;
 
 import org.bukkit.Chunk;
-import org.bukkit.Color;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -54,9 +53,9 @@ public class CmdExecutor implements CommandExecutor {
         if(!(sender instanceof Player)){ return false; }
         else
             ((Player) sender).getWorld().getEntities().stream()
-                    .filter(entity -> MobSpawnListener.isMonster(entity))
+                    .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                     .forEach(entity -> entity.remove());
-        sender.sendMessage("Killed all monsters");
+        sender.sendMessage("Killed all naturally spawning monsters");
         return true;
     }
 
@@ -103,17 +102,16 @@ public class CmdExecutor implements CommandExecutor {
 
             for(Player player : world.getPlayers()){
                 playerMonsters = player.getNearbyEntities(128, 128, 128).stream()
-                        .filter(entity -> MobSpawnListener.isMonster(entity))
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                         .count();
-                playerLimit = controller.getMobCaps().get(world) + controller.getBuffer();
+                playerLimit = controller.getMobCaps().get(world);
                 worldLimit += playerLimit;//overestimation
 
                 msgs.add(String.format("%s %s%s%d/%d", prefix, player.getDisplayName(), separator, playerMonsters, playerLimit));
             }
             worldLimit = Math.min(worldLimit, world.getMonsterSpawnLimit()*worldChunks.length/(17*17));
-            //worldLimit += world.getPlayerCount();
             worldMonsters = world.getEntities().stream()
-                    .filter(entity -> MobSpawnListener.isMonster(entity))
+                    .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                     .count();
 
             msgs.add(String.format("%s %s%s%d/%d", prefix, "Total", separator, worldMonsters, worldLimit));
