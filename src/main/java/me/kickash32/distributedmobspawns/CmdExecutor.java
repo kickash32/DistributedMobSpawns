@@ -104,7 +104,7 @@ public class CmdExecutor implements CommandExecutor {
                 playerMonsters = player.getNearbyEntities(128, 128, 128).stream()
                         .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                         .count();
-                playerLimit = controller.getMobCaps().get(world);
+                playerLimit = controller.getMobCapMonsters(world);
                 worldLimit += playerLimit;//overestimation
 
                 msgs.add(String.format("%s %s%s%d/%d", prefix, player.getDisplayName(), separator, playerMonsters, playerLimit));
