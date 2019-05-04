@@ -24,25 +24,27 @@ public class CmdExecutor implements CommandExecutor {
         String subCmd = args[0].toLowerCase();
 
         switch (subCmd) {
-            case "butcher":
-                return onButcherCommand(sender);
-            case "stats":
-                onDebugCommand(sender);
-                break;
-            case "help":
-                onHelpCommand(sender);
-                break;
-    //      case "reload"
-//            return onReloadCommand(sender);
-            case "toggle":
-                onToggleCommand(sender);
-                break;
+            case "butcher": return onButcherCommand(sender);
+            case "stats": onDebugCommand(sender);
+            case "help": onHelpCommand(sender);
+            case "reload": onReloadCommand(sender);
+            case "toggle": onToggleCommand(sender);
+            case "setbuffer": return onSetBufferCommand(sender, args);
             default:
                 sender.sendMessage("Unknown command");
                 onHelpCommand(sender);
                 return false;
         }
-        return true;
+        //return true;
+    }
+
+    private boolean onSetBufferCommand(CommandSender sender, String[] args) {
+        return controller.setBuffer(Integer.parseInt(args[1]));
+    }
+
+    private void onReloadCommand(CommandSender sender) {
+        controller.reloadConfig();
+        sender.sendMessage("[DMS] reload complete");
     }
 
     private void onToggleCommand(CommandSender sender) {
@@ -64,8 +66,9 @@ public class CmdExecutor implements CommandExecutor {
         sender.sendMessage("butcher: kill all monsters");
         sender.sendMessage("stats: view distribution of monsters");
         sender.sendMessage("help: view command info");
-        //sender.sendMessage("reload: reload configuration from file");
+        sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
+        sender.sendMessage("setbuffer: change the variance of the mobcap");
     }
     private void onDebugCommand(CommandSender sender){
         ArrayList<String> msgs = new ArrayList<>();

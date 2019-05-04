@@ -1,6 +1,7 @@
 package me.kickash32.distributedmobspawns;
 
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
 import java.util.Timer;
@@ -21,7 +22,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.msl = new MobSpawnListener(this);
         this.cmdEx = new CmdExecutor(this);
         this.disabled = false;
-        this.buffer = 1;
 
         mobCaps = new HashMap<>();
         for(World world : this.getServer().getWorlds()){
@@ -31,6 +31,15 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.getCommand("dms").setExecutor(cmdEx);
         this.fakeEventGen = new Timer();
         fakeEventGen.schedule(new FakePlayerNaturallySpawnCreaturesEventCreator(this),0, 50);
+
+        loadConfig();
+    }
+
+    void loadConfig(){
+        FileConfiguration config = this.getConfig();
+        config.addDefault("buffer", 1);
+        this.buffer = Math.max(config.getInt("buffer", 0), 0);
+        this.saveDefaultConfig();
     }
 
     void serverPaperDetected(){
@@ -39,6 +48,14 @@ public final class DistributedMobSpawns extends JavaPlugin {
             System.out.println("[DMS] Detected Paper");
             fakeEventGen.cancel();
         }
+    }
+
+    boolean setBuffer(int x){
+        if(x >= 0) {
+            buffer = x;
+            return true;
+        }
+        else { return false; }
     }
 
     int getBuffer(){
