@@ -10,17 +10,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 
 public class MobSpawnListener implements Listener {
     private DistributedMobSpawns controller;
     private HashMap<World, LongHashSet> blackLists;
-    //public int buffer;
-    //public HashMap<World, Integer> mobCaps;
 
     MobSpawnListener(DistributedMobSpawns controller){
         this.controller = controller;
@@ -32,6 +27,11 @@ public class MobSpawnListener implements Listener {
         }
     }
 
+    LongHashSet getBlackList(World world){
+        return blackLists.get(world);
+    }
+
+
     @EventHandler
     public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
         controller.serverPaperDetected();
@@ -42,7 +42,7 @@ public class MobSpawnListener implements Listener {
         World world = player.getWorld();
         radius = 8;
 
-        LongHashSet chunksFull = blackLists.get(world);
+        LongHashSet chunksFull = getBlackList(world);
         LongHashSet playerChunks = new LongHashSet();
 
         Location location = player.getLocation();
@@ -115,7 +115,7 @@ public class MobSpawnListener implements Listener {
         if(!isMonster(event.getEntityType())){ return; }
 
         Location location = event.getLocation();
-        LongHashSet chunksFull = blackLists.get(location.getWorld());
+        LongHashSet chunksFull = getBlackList(location.getWorld());
         int chunkX = (int)Math.floor(0.0+location.getBlockX() / 16.0D);
         int chunkZ = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
 
