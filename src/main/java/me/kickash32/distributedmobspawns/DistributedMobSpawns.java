@@ -14,7 +14,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
     private boolean disabled;
     private boolean runningPaper = false;
 
-    private int defaultRadius;
+    //private int defaultRadius;
     private int buffer;
     private HashMap<World, Integer> mobCaps;
 
@@ -27,7 +27,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.fakeEventGen = new Timer();
         fakeEventGen.schedule(new FakePlayerNaturallySpawnCreaturesEventCreator(this),0, 50);
         this.disabled = false;
-        this.defaultRadius = Bukkit.spigot().getSpigotConfig().getInt("world-settings.default.mob-spawn-range", 8);
+        //this.defaultRadius = 8;//Bukkit.spigot().getSpigotConfig().getInt("world-settings.default.mob-spawn-range", 8);
         this.buffer = 1;
 
         mobCaps = new HashMap<>();
@@ -44,9 +44,9 @@ public final class DistributedMobSpawns extends JavaPlugin {
         }
     }
 
-    int getDefaultRadius(){
-        return defaultRadius;
-    }
+//    int getDefaultRadius(){
+//        return defaultRadius;
+//    }
 
     int getBuffer(){
         return buffer;

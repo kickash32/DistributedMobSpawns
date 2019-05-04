@@ -1,5 +1,5 @@
 name: DistributedMobSpawns
-version: 1.0
+version: 1.0.1
 main: me.kickash32.distributedmobspawns.DistributedMobSpawns
 commands:
   dms:
