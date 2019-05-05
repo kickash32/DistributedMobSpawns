@@ -1,0 +1,2 @@
+#buffer is the maximum number of extra mobs allowed to a player's region
+buffer: 0

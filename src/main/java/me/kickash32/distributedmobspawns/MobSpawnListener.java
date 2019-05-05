@@ -137,11 +137,13 @@ public class MobSpawnListener implements Listener {
     }
 
     static boolean isNaturallySpawningMonster(Entity entity){
+        if (entity == null) { return false; }
         return isNaturallySpawningMonster(entity.getType());
     }
 
     static boolean isNaturallySpawningMonster(EntityType type){
-        Class<? extends Entity> c = type.getEntityClass();
+        if (type == EntityType.UNKNOWN || type == null) { return false; }
+        Class c = type.getEntityClass();
         return (Monster.class.isAssignableFrom(c)||
                 Slime.class.isAssignableFrom(c)||
                 Ghast.class.isAssignableFrom(c)) &&

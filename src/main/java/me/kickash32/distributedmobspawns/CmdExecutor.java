@@ -24,32 +24,55 @@ public class CmdExecutor implements CommandExecutor {
         String subCmd = args[0].toLowerCase();
 
         switch (subCmd) {
-            case "setbuffer": return onSetBufferCommand(sender, args);
-            case "butcher": return onButcherCommand(sender);
-            case "stats": onDebugCommand(sender);
-            case "help": onHelpCommand(sender);
-            case "reload": onReloadCommand(sender);
-            case "toggle": onToggleCommand(sender);
+            case "setbuffer":
+                onSetBufferCommand(sender, args);
+                break;
+            case "butcher":
+                onButcherCommand(sender);
+                break;
+            case "stats":
+                onDebugCommand(sender);
+                break;
+            case "help":
+                onHelpCommand(sender);
+                break;
+            case "reload":
+                onReloadCommand(sender);
+                break;
+            case "toggle":
+                onToggleCommand(sender);
+                break;
             default:
                 sender.sendMessage("Unknown command");
-                onHelpCommand(sender);
                 return false;
         }
-        //return true;
+        return true;
     }
 
-    private boolean onSetBufferCommand(CommandSender sender, String[] args) {
-        return controller.setBuffer(Integer.parseInt(args[1]));
+    private void onSetBufferCommand(CommandSender sender, String[] args) {
+        int size;
+        try{
+            size = Integer.parseInt(args[1]);
+        }catch (NumberFormatException e){
+            size = -1;
+        }
+        boolean tmp = controller.setBuffer(size);
+        if (tmp){
+            sender.sendMessage("Successfully updated buffer amount");
+        }
+        else{
+            sender.sendMessage("Failed to change buffer. Enter a positive buffer size.");
+        }
     }
 
-    private boolean onButcherCommand(CommandSender sender) {
-        if(!(sender instanceof Player)){ return false; }
-        else
+    private void onButcherCommand(CommandSender sender) {
+        if(sender instanceof Player){
             ((Player) sender).getWorld().getEntities().stream()
                     .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                     .forEach(entity -> entity.remove());
-        sender.sendMessage("Killed all naturally spawning monsters");
-        return true;
+            sender.sendMessage("Killed all naturally spawning monsters");
+        }
+        else { sender.sendMessage("Not currently possible from console"); }
     }
 
     private void onReloadCommand(CommandSender sender) {

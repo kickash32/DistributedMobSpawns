@@ -37,9 +37,8 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
     void loadConfig(){
         FileConfiguration config = this.getConfig();
-        config.addDefault("buffer", 1);
-        this.buffer = Math.max(config.getInt("buffer", 0), 0);
         this.saveDefaultConfig();
+        this.buffer = Math.max(config.getInt("buffer", 0), 0);
     }
 
     void serverPaperDetected(){
