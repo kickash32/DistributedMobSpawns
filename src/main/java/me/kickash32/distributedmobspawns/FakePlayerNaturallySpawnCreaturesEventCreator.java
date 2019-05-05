@@ -20,7 +20,7 @@ public class FakePlayerNaturallySpawnCreaturesEventCreator extends TimerTask {
 
             for (Player entityhuman : worldserver.getOnlinePlayers()) {
                 if (!entityhuman.getGameMode().equals(GameMode.SPECTATOR)) {
-                    msl.update(entityhuman, 8);
+                    msl.update(entityhuman, controller.getSpawnRange());
                 }
             }
         }

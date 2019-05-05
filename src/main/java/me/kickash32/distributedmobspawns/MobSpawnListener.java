@@ -31,16 +31,15 @@ public class MobSpawnListener implements Listener {
         return blackListsMonsters.get(world);
     }
 
-
-    @EventHandler
-    public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
-        controller.serverPaperDetected();
-        update(event.getPlayer(), event.getSpawnRadius());
-    }
+//    @EventHandler //removed until a better way is found for supporting spigot
+//    public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
+//        controller.serverPaperDetected();
+//        update(event.getPlayer(), event.getSpawnRadius());
+//    }
 
     void update(Player player, int radius){
-        World world = player.getWorld();
         radius = 8;
+        World world = player.getWorld();
 
         LongHashSet chunksFull = getBlackListMonsters(world);
         LongHashSet playerChunks = new LongHashSet();
@@ -51,14 +50,14 @@ public class MobSpawnListener implements Listener {
         int kk = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
         int monsterCount = 0;
         //the maximum density for each player is defined as the mobcap distributed over 17x17 chunks (refer to mojang's code)
-        double densityLimit = (double) (controller.getMobCapMonsters(world) + controller.getBuffer()) / (17*17);
+        double densityLimit = (double) (controller.getMobCapMonsters(world) + controller.getBuffer()) / controller.chunksInRadius(radius);
 
         //get Chunk info
         Chunk chunk;
         for(int i = -radius; i <= radius; i++){
             for(int k = -radius; k <= radius; k++) {
                 //ignore chunks that are more than 128 blocks away
-                if (i * i + k * k >= (8 + 1) * (8 + 1)) { continue; }
+                if (i * i + k * k >= (radius + 1) * (radius + 1)) { continue; }
                 int chunkX = i + ii;
                 int chunkZ = k + kk;
                 if (!world.isChunkLoaded(chunkX, chunkZ)) { continue; }
@@ -76,7 +75,7 @@ public class MobSpawnListener implements Listener {
         //add or remove chunks from blacklist accordingly
         Iterator<Long> iteration = playerChunks.iterator();
         Long cnk;
-        boolean tmp = (double)(monsterCount)/playerChunks.size() >= densityLimit;
+        boolean tmp = (double)(monsterCount)/controller.chunksInRadius(radius) > densityLimit;
         while (iteration.hasNext()) {
             cnk = iteration.next();
             if (tmp) {
@@ -113,6 +112,7 @@ public class MobSpawnListener implements Listener {
     @EventHandler
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
         //if(controller.runningOnPaper()){ return; }//disabled due to paper onPreCreatureSpawnEvent broken
+        //System.out.println(""+controller.isDisabled()+event.getSpawnReason()+event.getLocation());
         if (controller.isDisabled()){ return; }
         if (!event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)){ return; }
         if(!isNaturallySpawningMonster(event.getEntityType())){ return; }
