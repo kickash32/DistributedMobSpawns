@@ -7,9 +7,7 @@ Setup your enviornment to compile a plugin targetting latest Paper API
 # Planned features
 
 HIGH priority:
-Comments in code,
-Abstraction,
-buffer configuration
+seperate blacklist for mob spawners (default off)
 
 MEDIUM priority:
 dynamic total cap,
