@@ -41,7 +41,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         FileConfiguration config = this.getConfig();
         this.saveDefaultConfig();
         this.buffer = Math.max(config.getInt("buffer", 0), 0);
-        this.spawnRange = config.getInt("mob-spawn-range", 8);
+        this.spawnRange = config.getInt("mob-spawn-range", 6);
         if(config.getBoolean("adjust-spawn-limits-for-range", true)){ adjustLimits(); }
         else { adjustCaps(); }
     }
