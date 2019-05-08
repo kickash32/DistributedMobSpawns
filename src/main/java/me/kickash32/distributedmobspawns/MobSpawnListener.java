@@ -147,7 +147,9 @@ public class MobSpawnListener implements Listener {
         return (Monster.class.isAssignableFrom(c)||
                 Slime.class.isAssignableFrom(c)||
                 Ghast.class.isAssignableFrom(c)) &&
-                !ElderGuardian.class.isAssignableFrom(c);//guardian does not spawn naturally
+                !ElderGuardian.class.isAssignableFrom(c) && //guardian does not spawn naturally
+                !Phantom.class.isAssignableFrom(c); //phantoms do not count towards monsters mobcap
+
     }
 
 //    public static boolean isAnimal(EntityType type){//TO DO
