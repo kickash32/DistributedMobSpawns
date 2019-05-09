@@ -61,7 +61,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
             int tmp = (int)(0.0+getMobCapMonsters(world) * 289 / chunksInRadius(spawnRange));
             //tmp = tmp*2;
             world.setMonsterSpawnLimit(tmp);
-            System.out.println("Set Mobcap to: "+tmp+" with radius: "+spawnRange);
+            System.out.println("Set Mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
         }
     }
 
@@ -69,7 +69,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         for(World world : this.getServer().getWorlds()){
             int tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapMonsters(world)/289);
             mobCaps.put(world, tmp);
-            System.out.println("Set Mobcap to: "+tmp+" with radius: "+spawnRange);
+            System.out.println("Set Mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
         }
     }
 
