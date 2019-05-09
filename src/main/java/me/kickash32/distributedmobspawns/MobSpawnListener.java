@@ -31,7 +31,7 @@ public class MobSpawnListener implements Listener {
         return whiteListsMonsters.get(world);
     }
 
-//    @EventHandler //removed until a better way is found for supporting spigot
+//    @EventHandler //removed until a better way is found for supporting spigot and paper optimizations at the same time
 //    public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
 //        controller.serverPaperDetected();
 //        update(event.getPlayer(), event.getSpawnRadius());
