@@ -83,8 +83,6 @@ public class MobSpawnListener implements Listener {
             }
             else{
                 chunksFull.remove(cnk);
-
-                //if(world.getentities)//dynamic cap
             }
         }
     }
@@ -112,9 +110,7 @@ public class MobSpawnListener implements Listener {
     @EventHandler
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
         //if(controller.runningOnPaper()){ return; }//disabled due to paper onPreCreatureSpawnEvent broken
-        //System.out.println(""+controller.isDisabled()+event.getSpawnReason()+event.getLocation());
         if (controller.isDisabled()){ return; }
-        if (!event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)){ return; }
         if(!isNaturallySpawningMonster(event.getEntity())){ return; }
 
         Location location = event.getLocation();
