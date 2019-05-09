@@ -2,6 +2,7 @@ package me.kickash32.distributedmobspawns;
 
 import org.bukkit.GameMode;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import java.util.TimerTask;
 
@@ -16,11 +17,13 @@ public class FakePlayerNaturallySpawnCreaturesEventCreator extends TimerTask {
     public void run() {
         try {
             MobSpawnListener msl = controller.getListener();
-            Server worldserver = controller.getServer();
+            Server server = controller.getServer();
 
-            for (Player entityhuman : worldserver.getOnlinePlayers()) {
-                if (!entityhuman.getGameMode().equals(GameMode.SPECTATOR)) {
-                    msl.update(entityhuman, controller.getSpawnRange());
+            for (World world : server.getWorlds()) {
+                for (Player player : world.getPlayers()){
+                    if (!player.getGameMode().equals(GameMode.SPECTATOR)) {
+                        msl.update(player, controller.getSpawnRange());
+                    }
                 }
             }
         }
