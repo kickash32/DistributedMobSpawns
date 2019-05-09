@@ -27,6 +27,12 @@ public class MobSpawnListener implements Listener {
         }
     }
 
+    void reset(){
+        for(World world : controller.getServer().getWorlds()){
+            whiteListsMonsters.put(world, new LongHashSet());
+        }
+    }
+
     private LongHashSet getWhiteListMonsters(World world){
         return whiteListsMonsters.get(world);
     }
