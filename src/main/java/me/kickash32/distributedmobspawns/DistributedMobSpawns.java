@@ -2,6 +2,8 @@ package me.kickash32.distributedmobspawns;
 
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
 import java.util.Timer;
@@ -57,6 +59,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
     private void adjustLimits(){
         for(World world : this.getServer().getWorlds()){
             int tmp = (int)(0.0+getMobCapMonsters(world) * 289 / chunksInRadius(spawnRange));
+            //tmp = tmp*2;
             world.setMonsterSpawnLimit(tmp);
             System.out.println("Set Mobcap to: "+tmp+" with radius: "+spawnRange);
         }
@@ -113,6 +116,10 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        for(World world : this.getServer().getWorlds()) {
+            world.setMonsterSpawnLimit(getMobCapMonsters(world));
+        }
+
         fakeEventGen.cancel();
     }
 }
