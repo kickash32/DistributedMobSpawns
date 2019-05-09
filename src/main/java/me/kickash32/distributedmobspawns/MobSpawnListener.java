@@ -1,6 +1,7 @@
 package me.kickash32.distributedmobspawns;
 
 import com.destroystokyo.paper.event.entity.PlayerNaturallySpawnCreaturesEvent;
+import com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -31,11 +32,11 @@ public class MobSpawnListener implements Listener {
         return blackListsMonsters.get(world);
     }
 
-//    @EventHandler //removed until a better way is found for supporting spigot
-//    public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
-//        controller.serverPaperDetected();
-//        update(event.getPlayer(), event.getSpawnRadius());
-//    }
+    @EventHandler
+    public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
+        controller.serverPaperDetected();
+        update(event.getPlayer(), event.getSpawnRadius());
+    }
 
     void update(Player player, int radius){
         radius = 8;
@@ -89,30 +90,32 @@ public class MobSpawnListener implements Listener {
         }
     }
 
-    //event broken in paper 1.13.1
+//    //event broken in paper 1.13.1
 //    @EventHandler
 //    public void onPreCreatureSpawnEvent(PreCreatureSpawnEvent event) {
-//        controller.serverPaperDetected();
-//        if (controller.isDisabled()){ return; }
-//        if (!event.getReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)){ return; }
-//        if(!isNaturallySpawningMonster(event.getType())){ return; }
+//        System.out.println("New PREspawn "+event.getReason()+" of "+event.getType()+" at " + event.getSpawnLocation());
 //
-//        System.out.println(isNaturallySpawningMonster(event.getType())==isNaturallySpawningMonster(event.getType()));
-//
-//        Location location = event.getSpawnLocation();
-//        LongHashSet chunksFull = blackListsMonsters.get(location.getWorld());
-//        int chunkX = (int)Math.floor(0.0+location.getBlockX() / 16.0D);
-//        int chunkZ = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
-//
-//        if(chunksFull.contains(chunkX, chunkZ)) {
-//            event.setShouldAbortSpawn(true);
-//        }
+////        controller.serverPaperDetected();
+////        if (controller.isDisabled()){ return; }
+////        if (!event.getReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)){ return; }
+////        if(!isNaturallySpawningMonster(event.getType())){ return; }
+////
+////        System.out.println(isNaturallySpawningMonster(event.getType())==isNaturallySpawningMonster(event.getType()));
+////
+////        Location location = event.getSpawnLocation();
+////        LongHashSet chunksFull = blackListsMonsters.get(location.getWorld());
+////        int chunkX = (int)Math.floor(0.0+location.getBlockX() / 16.0D);
+////        int chunkZ = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
+////
+////        if(chunksFull.contains(chunkX, chunkZ)) {
+////            event.setShouldAbortSpawn(true);
+////        }
 //    }
 
     @EventHandler
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
+        //System.out.println("New spawn "+event.getSpawnReason()+" of "+event.getEntityType()+" at " + event.getEntity().getLocation());
         //if(controller.runningOnPaper()){ return; }//disabled due to paper onPreCreatureSpawnEvent broken
-        //System.out.println(""+controller.isDisabled()+event.getSpawnReason()+event.getLocation());
         if (controller.isDisabled()){ return; }
         if (!event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)){ return; }
         if(!isNaturallySpawningMonster(event.getEntityType())){ return; }
@@ -123,6 +126,7 @@ public class MobSpawnListener implements Listener {
         int chunkZ = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
 
         if(chunksFull.contains(chunkX, chunkZ)) {
+            //System.out.println("stopped spawning event");
             event.setCancelled(true);
         }
     }
