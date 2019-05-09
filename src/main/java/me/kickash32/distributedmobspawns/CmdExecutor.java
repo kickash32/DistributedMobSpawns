@@ -119,7 +119,7 @@ public class CmdExecutor implements CommandExecutor {
 
             worldLimit = 0;
             worldChunks = world.getLoadedChunks();
-            worldBlackList = controller.getListener().getBlacklist().get(world);
+            worldBlackList = controller.getListener().getWhitelistMonsters(world);
 
             HashSet<Long> finalWorldBlackList = worldBlackList;
             worldBlackListSize = Arrays.stream(worldChunks)

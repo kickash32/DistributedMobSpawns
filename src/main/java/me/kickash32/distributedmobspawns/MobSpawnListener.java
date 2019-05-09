@@ -15,20 +15,20 @@ import java.util.*;
 
 public class MobSpawnListener implements Listener {
     private DistributedMobSpawns controller;
-    private HashMap<World, LongHashSet> blackListsMonsters;//Each world has its own blacklist of chunks(stored as a set of location hashes)
+    private HashMap<World, LongHashSet> whiteListsMonsters;//Each world has its own whitelist of chunks(stored as a set of location hashes) where monsters can spawn
 
     MobSpawnListener(DistributedMobSpawns controller){
         this.controller = controller;
         controller.getServer().getPluginManager().registerEvents(this, controller);
 
-        blackListsMonsters = new HashMap<>();
+        whiteListsMonsters = new HashMap<>();
         for(World world : controller.getServer().getWorlds()){
-            blackListsMonsters.put(world, new LongHashSet());
+            whiteListsMonsters.put(world, new LongHashSet());
         }
     }
 
-    private LongHashSet getBlackListMonsters(World world){
-        return blackListsMonsters.get(world);
+    private LongHashSet getWhiteListMonsters(World world){
+        return whiteListsMonsters.get(world);
     }
 
 //    @EventHandler //removed until a better way is found for supporting spigot
@@ -41,7 +41,7 @@ public class MobSpawnListener implements Listener {
         radius = 8;
         World world = player.getWorld();
 
-        LongHashSet chunksFull = getBlackListMonsters(world);
+        LongHashSet whiteListChunks = getWhiteListMonsters(world);
         LongHashSet playerChunks = new LongHashSet();
 
         Location location = player.getLocation();
@@ -72,17 +72,17 @@ public class MobSpawnListener implements Listener {
             }
         }
 
-        //add or remove chunks from blacklist accordingly
+        //add or remove chunks from whitelist accordingly
         Iterator<Long> iteration = playerChunks.iterator();
         Long cnk;
         boolean tmp = (double)(monsterCount)/controller.chunksInRadius(radius) > densityLimit;
         while (iteration.hasNext()) {
             cnk = iteration.next();
             if (tmp) {
-                chunksFull.add(cnk);
+                whiteListChunks.remove(cnk);
             }
             else{
-                chunksFull.remove(cnk);
+                whiteListChunks.add(cnk);
             }
         }
     }
@@ -114,22 +114,18 @@ public class MobSpawnListener implements Listener {
         if(!isNaturallySpawningMonster(event.getEntity())){ return; }
 
         Location location = event.getLocation();
-        LongHashSet chunksFull = getBlackListMonsters(location.getWorld());
+        LongHashSet whitelist = getWhiteListMonsters(location.getWorld());
         int chunkX = (int)Math.floor(0.0+location.getBlockX() / 16.0D);
         int chunkZ = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
 
-        if(chunksFull.contains(chunkX, chunkZ)) {
+        if(!whitelist.contains(chunkX, chunkZ)) {
             event.setCancelled(true);
         }
     }
 
-    //get a copy of the blacklist
-    HashMap<World, HashSet<Long>> getBlacklist(){
-        HashMap<World, HashSet<Long>> result = new HashMap<>();
-        for(World world: blackListsMonsters.keySet()){
-            result.put(world, new HashSet<>(blackListsMonsters.get(world).toArrayList()));
-        }
-        return result;
+    //get a copy of the whitelist
+    HashSet<Long> getWhitelistMonsters(World world){
+        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
     }
 
     static boolean isNaturallySpawningMonster(Entity entity){
