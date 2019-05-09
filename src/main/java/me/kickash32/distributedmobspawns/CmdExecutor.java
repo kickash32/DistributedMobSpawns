@@ -142,7 +142,7 @@ public class CmdExecutor implements CommandExecutor {
                     .count();
 
             msgs.add(String.format("%s %s%s%d/%d", prefix, "Total", separator, worldMonsters, worldLimit));
-            msgs.add(String.format("%s %s%s%d/%d", prefix, "Blacklist size", separator, worldBlackListSize, worldChunks.length));
+            msgs.add(String.format("%s %s%s%d/%d", prefix, "Whitelist size", separator, worldBlackListSize, worldChunks.length));
         }
 
         sender.sendMessage(msgs.toArray(new String[0]));
