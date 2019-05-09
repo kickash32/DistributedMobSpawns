@@ -118,7 +118,7 @@ public class MobSpawnListener implements Listener {
         //if(controller.runningOnPaper()){ return; }//disabled due to paper onPreCreatureSpawnEvent broken
         if (controller.isDisabled()){ return; }
         if (!event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)){ return; }
-        if(!isNaturallySpawningMonster(event.getEntityType())){ return; }
+        if(!isNaturallySpawningMonster(event.getEntity())){ return; }
 
         Location location = event.getLocation();
         LongHashSet chunksFull = getBlackListMonsters(location.getWorld());
@@ -142,7 +142,8 @@ public class MobSpawnListener implements Listener {
 
     static boolean isNaturallySpawningMonster(Entity entity){
         if (entity == null) { return false; }
-        return isNaturallySpawningMonster(entity.getType());
+        return isNaturallySpawningMonster(entity.getType()) &&
+                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
     }
 
     static boolean isNaturallySpawningMonster(EntityType type){
