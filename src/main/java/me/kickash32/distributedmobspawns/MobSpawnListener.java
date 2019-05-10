@@ -53,17 +53,17 @@ public class MobSpawnListener implements Listener {
         return whiteListsWatermobs.get(world);
     }
 
-    HashSet<Long> getWhitelistAnimalsImmutable(World world){
-        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    LongHashSet getWhitelistAnimalsImmutable(World world){
+        return new LongHashSet(getWhiteListAnimals(world));
     }
-    HashSet<Long> getWhitelistMonstersImmutable(World world){
-        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    LongHashSet getWhitelistMonstersImmutable(World world){
+        return new LongHashSet(getWhiteListMonsters(world));
     }
-    HashSet<Long> getWhitelistAmbientImmutable(World world){
-        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    LongHashSet getWhitelistAmbientImmutable(World world){
+        return new LongHashSet(getWhiteListAmbient(world));
     }
-    HashSet<Long> getWhitelistWatermobsImmutable(World world){
-        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    LongHashSet getWhitelistWatermobsImmutable(World world){
+        return new LongHashSet(getWhiteListWatermobs(world));
     }
 //    @EventHandler //removed until a better way is found for supporting spigot and paper optimizations at the same time
 //    public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
@@ -75,49 +75,64 @@ public class MobSpawnListener implements Listener {
         radius = 8;
         World world = player.getWorld();
 
-        LongHashSet whiteListChunks = getWhiteListMonsters(world);
         LongHashSet playerChunks = new LongHashSet();
 
         Location location = player.getLocation();
         //get player's chunk co-ordinates
         int ii = (int)Math.floor(0.0+location.getBlockX() / 16.0D);
         int kk = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
+        int animalCount = 0;
         int monsterCount = 0;
+        int ambientCount = 0;
+        int watermobCount = 0;
+        int spawnChunksCount = controller.chunksInRadius(radius);
+
         //the maximum density for each player is defined as the mobcap distributed over 17x17 chunks (refer to mojang's code)
-        double densityLimit = (double) (controller.getMobCapMonsters(world) + controller.getBuffer()) / controller.chunksInRadius(radius);
+        double densityLimitAnimals = (double) (controller.getMobCapAnimals(world) + controller.getBuffer()) / spawnChunksCount;
+        double densityLimitMonsters = (double) (controller.getMobCapMonsters(world) + controller.getBuffer()) / spawnChunksCount;
+        double densityLimitAmbient = (double) (controller.getMobCapAmbient(world) + controller.getBuffer()) / spawnChunksCount;
+        double densityLimitWatermobs = (double) (controller.getMobCapWatermobs(world) + controller.getBuffer()) / spawnChunksCount;
 
         //get Chunk info
         Chunk chunk;
         for(int i = -radius; i <= radius; i++){
             for(int k = -radius; k <= radius; k++) {
-                //ignore chunks that are more than 128 blocks away
-                if (i * i + k * k >= (radius + 1) * (radius + 1)) { continue; }
                 int chunkX = i + ii;
                 int chunkZ = k + kk;
                 if (!world.isChunkLoaded(chunkX, chunkZ)) { continue; }
 
                 chunk = world.getChunkAt(chunkX, chunkZ);
-                playerChunks.add(chunkX, chunkZ);
+                playerChunks.add(util.LongHash.toLong(chunkX,chunkZ));
+
                 for (Entity entity : chunk.getEntities()) {
-                    if (isNaturallySpawningMonster(entity)) {
+                    if (isNaturallySpawningAnimal(entity)) {
+                        animalCount++;
+                    }
+                    else if (isNaturallySpawningMonster(entity)) {
                         monsterCount++;
+                    }
+                    else if (isNaturallySpawningAmbient(entity)) {
+                        ambientCount++;
+                    }
+                    else if (isNaturallySpawningWatermob(entity)) {
+                        watermobCount++;
                     }
                 }
             }
         }
 
-        //add or remove chunks from whitelist accordingly
-        Iterator<Long> iteration = playerChunks.iterator();
-        Long cnk;
-        boolean tmp = (double)(monsterCount)/controller.chunksInRadius(radius) > densityLimit;
-        while (iteration.hasNext()) {
-            cnk = iteration.next();
-            if (tmp) {
-                whiteListChunks.remove(cnk);
-            }
-            else{
-                whiteListChunks.add(cnk);
-            }
+        //add or remove chunks from whitelists accordingly
+        if ((double)(animalCount)/spawnChunksCount < densityLimitAnimals){
+            getWhiteListAnimals(world).addAll(playerChunks);
+        }
+        if ((double)(monsterCount)/spawnChunksCount < densityLimitMonsters){
+            getWhiteListMonsters(world).addAll(playerChunks);
+        }
+        if ((double)(ambientCount)/spawnChunksCount < densityLimitAmbient){
+            getWhiteListAmbient(world).addAll(playerChunks);
+        }
+        if ((double)(watermobCount)/spawnChunksCount < densityLimitWatermobs){
+            getWhiteListWatermobs(world).addAll(playerChunks);
         }
     }
 
@@ -145,16 +160,32 @@ public class MobSpawnListener implements Listener {
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
         //if(controller.runningOnPaper()){ return; }//disabled due to paper onPreCreatureSpawnEvent broken
         if (controller.isDisabled()){ return; }
-        if(!isNaturallySpawningMonster(event.getEntity())){ return; }
 
         Location location = event.getLocation();
-        LongHashSet whitelist = getWhiteListMonsters(location.getWorld());
-        int chunkX = (int)Math.floor(0.0+location.getBlockX() / 16.0D);
-        int chunkZ = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
+        LongHashSet whitelist;
+        if(isNaturallySpawningAnimal(event.getEntity())) {
+             whitelist = getWhiteListAnimals(location.getWorld());
+        }
+        else if(isNaturallySpawningMonster(event.getEntity())) {
+            whitelist = getWhiteListMonsters(location.getWorld());
+        }
+        else if(isNaturallySpawningAmbient(event.getEntity())) {
+            whitelist = getWhiteListAmbient(location.getWorld());
+        }
+        else if(isNaturallySpawningWatermob(event.getEntity())) {
+            whitelist = getWhiteListWatermobs(location.getWorld());
+        }
+        else{
+            return;
+        }
 
-        if(!whitelist.contains(chunkX, chunkZ)) {
+        int chunkX = (int) Math.floor(0.0 + location.getBlockX() / 16.0D);
+        int chunkZ = (int) Math.floor(0.0 + location.getBlockZ() / 16.0D);
+
+        if (!whitelist.contains(util.LongHash.toLong(chunkX, chunkZ))) {
             event.setCancelled(true);
         }
+
     }
 
     static boolean isNaturallySpawningAnimal(Entity entity){

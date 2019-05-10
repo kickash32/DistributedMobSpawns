@@ -11,7 +11,10 @@ import java.util.Timer;
 public final class DistributedMobSpawns extends JavaPlugin {
     private boolean disabled;
     private boolean runningPaper = false;
-    private HashMap<World, Integer> mobCaps;
+    private HashMap<World, Integer> mobCapsAnimals;
+    private HashMap<World, Integer> mobCapsMonsters;
+    private HashMap<World, Integer> mobCapsAmbient;
+    private HashMap<World, Integer> mobCapsWatermobs;
 
     private MobSpawnListener msl;
     private CmdExecutor cmdEx;
@@ -27,9 +30,15 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.cmdEx = new CmdExecutor(this);
         this.disabled = false;
 
-        mobCaps = new HashMap<>();
+        mobCapsAnimals = new HashMap<>();
+        mobCapsMonsters = new HashMap<>();
+        mobCapsAmbient = new HashMap<>();
+        mobCapsWatermobs = new HashMap<>();
         for(World world : this.getServer().getWorlds()){
-            mobCaps.put(world, world.getMonsterSpawnLimit());
+            mobCapsAnimals.put(world, world.getAnimalSpawnLimit());
+            mobCapsMonsters.put(world, world.getMonsterSpawnLimit());
+            mobCapsAmbient.put(world, world.getAmbientSpawnLimit());
+            mobCapsWatermobs.put(world, world.getWaterAnimalSpawnLimit());
         }
         loadConfig();
         adjustLimits();
@@ -44,8 +53,10 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.saveDefaultConfig();
         this.buffer = Math.max(config.getInt("buffer", 0), 0);
         this.spawnRange = config.getInt("mob-spawn-range", 6);
-        if(config.getBoolean("adjust-spawn-limits-for-range", true)){ adjustLimits(); }
-        else { adjustCaps(); }
+        if(config.getBoolean("adjust-spawn-limits-for-range", true))
+            { adjustLimits(); }
+        else
+            { adjustCaps(); }
     }
 
     void serverPaperDetected(){
@@ -59,9 +70,8 @@ public final class DistributedMobSpawns extends JavaPlugin {
     private void adjustLimits(){
         for(World world : this.getServer().getWorlds()){
             int tmp = (int)(0.0+getMobCapMonsters(world) * 289 / chunksInRadius(spawnRange));
-            //tmp = tmp*2;
             world.setMonsterSpawnLimit(tmp);
-            System.out.println("Set Mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("Set Monster limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
         }
     }
 
@@ -69,7 +79,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         for(World world : this.getServer().getWorlds()){
             int tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapMonsters(world)/289);
             mobCaps.put(world, tmp);
-            System.out.println("Set Mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("Set Monsters mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
         }
     }
 
@@ -93,8 +103,17 @@ public final class DistributedMobSpawns extends JavaPlugin {
         return buffer;
     }
 
+    int getMobCapAnimals(World world){
+        return mobCapsAnimals.get(world);
+    }
     int getMobCapMonsters(World world){
-        return mobCaps.get(world);
+        return mobCapsMonsters.get(world);
+    }
+    int getMobCapAmbient(World world){
+        return mobCapsAmbient.get(world);
+    }
+    int getMobCapWatermobs(World world){
+        return mobCapsWatermobs.get(world);
     }
 
     boolean runningOnPaper(){
