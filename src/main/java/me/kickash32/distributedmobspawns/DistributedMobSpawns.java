@@ -10,7 +10,7 @@ import java.util.Timer;
 
 public final class DistributedMobSpawns extends JavaPlugin {
     private boolean disabled;
-    private boolean runningPaper = false;
+    private boolean runningPaper;
     private HashMap<World, Integer> mobCapsAnimals;
     private HashMap<World, Integer> mobCapsMonsters;
     private HashMap<World, Integer> mobCapsAmbient;
@@ -29,6 +29,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.msl = new MobSpawnListener(this);
         this.cmdEx = new CmdExecutor(this);
         this.disabled = false;
+        this.runningPaper = false;
 
         mobCapsAnimals = new HashMap<>();
         mobCapsMonsters = new HashMap<>();
@@ -57,14 +58,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
             { adjustLimits(); }
         else
             { adjustCaps(); }
-    }
-
-    void serverPaperDetected(){
-        if(!runningOnPaper()) {
-            runningPaper = true;
-            System.out.println("[DMS] Detected Paper");
-            fakeEventGen.cancel();
-        }
     }
 
     private void adjustLimits(){
@@ -109,24 +102,13 @@ public final class DistributedMobSpawns extends JavaPlugin {
         }
     }
 
-    public int chunksInRadius(int radius){
-        return ((radius*2)+1)*((radius*2)+1);
-    }
-
-    int getSpawnRange(){
-        return spawnRange;
-    }
-
-    boolean setBuffer(int x){
-        if(x >= 0) {
-            buffer = x;
-            return true;
+    @Override
+    public void onDisable() {
+        for(World world : this.getServer().getWorlds()) {
+            world.setMonsterSpawnLimit(getMobCapMonsters(world));
         }
-        else { return false; }
-    }
 
-    int getBuffer(){
-        return buffer;
+        fakeEventGen.cancel();
     }
 
     int getMobCapAnimals(World world){
@@ -142,8 +124,36 @@ public final class DistributedMobSpawns extends JavaPlugin {
         return mobCapsWatermobs.get(world);
     }
 
+    int getSpawnRange(){
+        return spawnRange;
+    }
+
+    int getBuffer(){
+        return buffer;
+    }
+
+    boolean setBuffer(int x){
+        if(x >= 0) {
+            buffer = x;
+            return true;
+        }
+        else { return false; }
+    }
+
     boolean runningOnPaper(){
         return runningPaper;
+    }
+
+    void serverPaperDetected(){
+        if(!runningOnPaper()) {
+            runningPaper = true;
+            System.out.println("[DMS] Detected Paper");
+            fakeEventGen.cancel();
+        }
+    }
+
+    boolean isDisabled(){
+        return disabled;
     }
 
     boolean toggleDisabled(){
@@ -151,20 +161,11 @@ public final class DistributedMobSpawns extends JavaPlugin {
         return disabled;
     }
 
-    boolean isDisabled(){
-        return disabled;
-    }
-
     MobSpawnListener getListener(){
         return msl;
     }
 
-    @Override
-    public void onDisable() {
-        for(World world : this.getServer().getWorlds()) {
-            world.setMonsterSpawnLimit(getMobCapMonsters(world));
-        }
-
-        fakeEventGen.cancel();
+    public static int chunksInRadius(int radius){
+        return ((radius*2)+1)*((radius*2)+1);
     }
 }

@@ -185,7 +185,6 @@ public class MobSpawnListener implements Listener {
         if (!whitelist.contains(util.LongHash.toLong(chunkX, chunkZ))) {
             event.setCancelled(true);
         }
-
     }
 
     static boolean isNaturallySpawningAnimal(Entity entity){
