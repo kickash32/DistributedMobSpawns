@@ -5,10 +5,10 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.*;
-import util.LongHashSet;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.eclipse.collections.impl.set.mutable.primitive.LongHashSet;
 
 import java.util.*;
 

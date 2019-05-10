@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.eclipse.collections.impl.set.mutable.primitive.LongHashSet;
 import util.LongHash;
 
 import java.util.*;
@@ -103,7 +104,7 @@ public class CmdExecutor implements CommandExecutor {
         long playerLimit;
         int radius;
         Chunk[] worldChunks;
-        HashSet<Long> worldBlackList;
+        LongHashSet worldBlackList;
         long worldBlackListSize;
 
         msgs.add("[Distributed Mob Spawns]");
@@ -121,7 +122,7 @@ public class CmdExecutor implements CommandExecutor {
             worldChunks = world.getLoadedChunks();
             worldBlackList = controller.getListener().getWhitelistMonstersImmutable(world);
 
-            HashSet<Long> finalWorldBlackList = worldBlackList;
+            LongHashSet finalWorldBlackList = worldBlackList;
             worldBlackListSize = Arrays.stream(worldChunks)
                     .filter(chunk -> finalWorldBlackList.contains(
                             LongHash.toLong(chunk.getX(), chunk.getZ())))
