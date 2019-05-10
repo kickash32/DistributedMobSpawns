@@ -68,18 +68,44 @@ public final class DistributedMobSpawns extends JavaPlugin {
     }
 
     private void adjustLimits(){
+        int tmp;
         for(World world : this.getServer().getWorlds()){
-            int tmp = (int)(0.0+getMobCapMonsters(world) * 289 / chunksInRadius(spawnRange));
+            tmp = (int)(0.0+getMobCapAnimals(world) * 289 / chunksInRadius(spawnRange));
+            world.setAnimalSpawnLimit(tmp);
+            System.out.println("Set Animal limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
+            tmp = (int)(0.0+getMobCapMonsters(world) * 289 / chunksInRadius(spawnRange));
             world.setMonsterSpawnLimit(tmp);
             System.out.println("Set Monster limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
+            tmp = (int)(0.0+getMobCapAmbient(world) * 289 / chunksInRadius(spawnRange));
+            world.setAmbientSpawnLimit(tmp);
+            System.out.println("Set Ambient limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
+            tmp = (int)(0.0+getMobCapWatermobs(world) * 289 / chunksInRadius(spawnRange));
+            world.setWaterAnimalSpawnLimit(tmp);
+            System.out.println("Set Watermobs limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
         }
     }
 
     private void adjustCaps(){
+        int tmp;
         for(World world : this.getServer().getWorlds()){
-            int tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapMonsters(world)/289);
-            mobCaps.put(world, tmp);
+            tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapAnimals(world)/289);
+            mobCapsAnimals.put(world, tmp);
+            System.out.println("Set Animals mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
+            tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapMonsters(world)/289);
+            mobCapsMonsters.put(world, tmp);
             System.out.println("Set Monsters mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
+            tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapAmbient(world)/289);
+            mobCapsAmbient.put(world, tmp);
+            System.out.println("Set Ambient mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
+            tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapWatermobs(world)/289);
+            mobCapsWatermobs.put(world, tmp);
+            System.out.println("Set Watermobs mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
         }
     }
 
