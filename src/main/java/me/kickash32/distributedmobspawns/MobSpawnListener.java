@@ -15,28 +15,56 @@ import java.util.*;
 
 public class MobSpawnListener implements Listener {
     private DistributedMobSpawns controller;
-    private HashMap<World, LongHashSet> whiteListsMonsters;//Each world has its own whitelist of chunks(stored as a set of location hashes) where monsters can spawn
+    private HashMap<World, LongHashSet> whiteListsAnimals;//Each world has its own whitelist of chunks(stored as a set of location hashes) where monsters can spawn
+    private HashMap<World, LongHashSet> whiteListsMonsters;
+    private HashMap<World, LongHashSet> whiteListsAmbient;
+    private HashMap<World, LongHashSet> whiteListsWatermobs;
 
     MobSpawnListener(DistributedMobSpawns controller){
         this.controller = controller;
         controller.getServer().getPluginManager().registerEvents(this, controller);
 
+        whiteListsAnimals = new HashMap<>();
         whiteListsMonsters = new HashMap<>();
-        for(World world : controller.getServer().getWorlds()){
-            whiteListsMonsters.put(world, new LongHashSet());
-        }
+        whiteListsAmbient = new HashMap<>();
+        whiteListsWatermobs = new HashMap<>();
+        reset();
     }
 
     void reset(){
         for(World world : controller.getServer().getWorlds()){
+            whiteListsAnimals.put(world, new LongHashSet());
             whiteListsMonsters.put(world, new LongHashSet());
+            whiteListsAmbient.put(world, new LongHashSet());
+            whiteListsWatermobs.put(world, new LongHashSet());
         }
     }
 
+    private LongHashSet getWhiteListAnimals(World world){
+        return whiteListsAnimals.get(world);
+    }
     private LongHashSet getWhiteListMonsters(World world){
         return whiteListsMonsters.get(world);
     }
+    private LongHashSet getWhiteListAmbient(World world){
+        return whiteListsAmbient.get(world);
+    }
+    private LongHashSet getWhiteListWatermobs(World world){
+        return whiteListsWatermobs.get(world);
+    }
 
+    HashSet<Long> getWhitelistAnimalsImmutable(World world){
+        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    }
+    HashSet<Long> getWhitelistMonstersImmutable(World world){
+        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    }
+    HashSet<Long> getWhitelistAmbientImmutable(World world){
+        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    }
+    HashSet<Long> getWhitelistWatermobsImmutable(World world){
+        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    }
 //    @EventHandler //removed until a better way is found for supporting spigot and paper optimizations at the same time
 //    public void onPlayerNaturallySpawnCreaturesEvent(PlayerNaturallySpawnCreaturesEvent event){
 //        controller.serverPaperDetected();
@@ -129,18 +157,23 @@ public class MobSpawnListener implements Listener {
         }
     }
 
-    //get a copy of the whitelist
-    HashSet<Long> getWhitelistMonsters(World world){
-        return new HashSet<>(getWhiteListMonsters(world).toArrayList());
+    static boolean isNaturallySpawningAnimal(Entity entity){
+        if (entity == null) { return false; }
+        return isAnimal(entity.getType()) &&
+                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+    }
+    static boolean isAnimal(EntityType type){
+        if (type == EntityType.UNKNOWN || type == null) { return false; }
+        Class c = type.getEntityClass();
+        return Animals.class.isAssignableFrom(c);
     }
 
     static boolean isNaturallySpawningMonster(Entity entity){
         if (entity == null) { return false; }
-        return isNaturallySpawningMonster(entity.getType()) &&
+        return isMonster(entity.getType()) &&
                 entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
     }
-
-    static boolean isNaturallySpawningMonster(EntityType type){
+    static boolean isMonster(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
         Class c = type.getEntityClass();
         boolean result = (Monster.class.isAssignableFrom(c)||
@@ -150,18 +183,25 @@ public class MobSpawnListener implements Listener {
                 !Phantom.class.isAssignableFrom(c); //phantoms do not count towards monsters mobcap
     }
 
-//    public static boolean isAnimal(EntityType type){//TO DO
-//
-//        return false;
-//    }
-//
-//    public static boolean isWaterAnimal(EntityType type){//TO DO
-//
-//        return false;
-//    }
-//
-//    public static boolean isAmbient(EntityType type){//TO DO
-//
-//        return false;
-//    }
+    static boolean isNaturallySpawningAmbient(Entity entity){
+        if (entity == null) { return false; }
+        return isAmbient(entity.getType()) &&
+                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+    }
+    static boolean isAmbient(EntityType type){
+        if (type == EntityType.UNKNOWN || type == null) { return false; }
+        Class c = type.getEntityClass();
+        return Ambient.class.isAssignableFrom(c);
+    }
+
+    static boolean isNaturallySpawningWatermob(Entity entity){
+        if (entity == null) { return false; }
+        return isWatermob(entity.getType()) &&
+                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+    }
+    static boolean isWatermob(EntityType type){
+        if (type == EntityType.UNKNOWN || type == null) { return false; }
+        Class c = type.getEntityClass();
+        return WaterMob.class.isAssignableFrom(c);
+    }
 }
