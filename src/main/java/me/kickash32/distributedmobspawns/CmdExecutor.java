@@ -6,6 +6,7 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.eclipse.collections.impl.set.mutable.primitive.LongHashSet;
 import util.LongHash;
@@ -29,7 +30,7 @@ public class CmdExecutor implements CommandExecutor {
                 onSetBufferCommand(sender, args);
                 break;
             case "butcher":
-                onButcherCommand(sender);
+                onButcherCommand(sender, args);
                 break;
             case "stats":
                 onDebugCommand(sender);
@@ -66,14 +67,51 @@ public class CmdExecutor implements CommandExecutor {
         }
     }
 
-    private void onButcherCommand(CommandSender sender) {
-        if(sender instanceof Player){
-            ((Player) sender).getWorld().getEntities().stream()
-                    .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
-                    .forEach(entity -> entity.remove());
-            sender.sendMessage("Killed all naturally spawning monsters");
+    private void onButcherCommand(CommandSender sender, String[] args) {
+        if (args == null || args[1] == null) {
+            sender.sendMessage("Unknown mobtype, see help");
+            return;
         }
-        else { sender.sendMessage("Not currently possible from console"); }
+
+        List<Entity> entityList = new ArrayList<>();
+        if(sender instanceof Player){
+            entityList = ((Player) sender).getWorld().getEntities();
+        }
+        else{
+            for(World world : sender.getServer().getWorlds()){
+                entityList.addAll(world.getEntities());
+            }
+        }
+
+        switch (args[1].toLowerCase()){
+            case "animals":
+                entityList.stream()
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
+                        .forEach(entity -> entity.remove());
+                sender.sendMessage("Successfully killed all animals");
+                break;
+            case "monster":
+                entityList.stream()
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
+                        .forEach(entity -> entity.remove());
+                sender.sendMessage("Successfully killed all monsters");
+                break;
+            case "ambient":
+                entityList.stream()
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
+                        .forEach(entity -> entity.remove());
+                sender.sendMessage("Successfully killed all ambient mobs");
+                break;
+            case "watermobs":
+                entityList.stream()
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
+                        .forEach(entity -> entity.remove());
+                sender.sendMessage("Successfully killed all watermobs");
+                break;
+            default:
+                sender.sendMessage("Unknown entity type, try animals, monster, ambient, watermobs");
+                break;
+        }
     }
 
     private void onReloadCommand(CommandSender sender) {
@@ -88,14 +126,14 @@ public class CmdExecutor implements CommandExecutor {
 
     private void onHelpCommand(CommandSender sender){
         sender.sendMessage("[DMS] command list");
-        sender.sendMessage("butcher: kill all monsters");
-        sender.sendMessage("setbuffer: change the variance of the mobcap");
+        sender.sendMessage("butcher {mobtype}: kill all mobs of {mobtype} from the current world");
+        sender.sendMessage("setbuffer {pos integer}: change the variance of the mobcap");
         sender.sendMessage("stats: view distribution of monsters");
         sender.sendMessage("help: view command info");
         sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
     }
-    private void onDebugCommand(CommandSender sender){
+    private void onDebugCommand(CommandSender sender){// TO DO
         ArrayList<String> msgs = new ArrayList<>();
         Server server = controller.getServer();
         long worldMonsters;
