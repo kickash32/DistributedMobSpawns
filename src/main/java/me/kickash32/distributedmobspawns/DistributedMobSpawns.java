@@ -41,7 +41,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
             mobCapsWatermobs.put(world, world.getWaterAnimalSpawnLimit());
         }
         loadConfig();
-        adjustLimits();
 
         this.getCommand("dms").setExecutor(cmdEx);
         this.fakeEventGen = new Timer();
@@ -63,20 +62,22 @@ public final class DistributedMobSpawns extends JavaPlugin {
         int tmp;
         for(World world : this.getServer().getWorlds()){
             tmp = (int)(0.0+getMobCapAnimals(world) * 289 / chunksInRadius(spawnRange));
+            System.out.println("Set Animal limit to: "+tmp+" was: "+getMobCapAnimals(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setAnimalSpawnLimit(tmp);
-            System.out.println("Set Animal limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
 
             tmp = (int)(0.0+getMobCapMonsters(world) * 289 / chunksInRadius(spawnRange));
+            System.out.println("Set Monster limit to: "+tmp+" was: "+getMobCapMonsters(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setMonsterSpawnLimit(tmp);
-            System.out.println("Set Monster limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
 
             tmp = (int)(0.0+getMobCapAmbient(world) * 289 / chunksInRadius(spawnRange));
+            System.out.println("Set Ambient limit to: "+tmp+" was: "+getMobCapAmbient(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setAmbientSpawnLimit(tmp);
-            System.out.println("Set Ambient limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
 
             tmp = (int)(0.0+getMobCapWatermobs(world) * 289 / chunksInRadius(spawnRange));
+            System.out.println("Set Watermobs limit to: "+tmp+" was: "+getMobCapWatermobs(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setWaterAnimalSpawnLimit(tmp);
-            System.out.println("Set Watermobs limit to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+
         }
     }
 
@@ -104,7 +105,10 @@ public final class DistributedMobSpawns extends JavaPlugin {
     @Override
     public void onDisable() {
         for(World world : this.getServer().getWorlds()) {
+            world.setAnimalSpawnLimit(getMobCapAnimals(world));
             world.setMonsterSpawnLimit(getMobCapMonsters(world));
+            world.setAmbientSpawnLimit(getMobCapAmbient(world));
+            world.setWaterAnimalSpawnLimit(getMobCapWatermobs(world));
         }
 
         fakeEventGen.cancel();
