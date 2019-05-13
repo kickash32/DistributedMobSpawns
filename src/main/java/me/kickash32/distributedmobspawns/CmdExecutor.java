@@ -11,8 +11,9 @@ import org.bukkit.entity.Player;
 import org.eclipse.collections.impl.set.mutable.primitive.LongHashSet;
 import util.LongHash;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class CmdExecutor implements CommandExecutor {
     private DistributedMobSpawns controller;
@@ -69,7 +70,7 @@ public class CmdExecutor implements CommandExecutor {
     }
 
     private void onButcherCommand(CommandSender sender, String[] args) {
-        if (args == null || args[1] == null) {
+        if (args == null || args[1] == null) {//CHECK ARRAY LENGTH
             sender.sendMessage("Unknown mobtype, see help");
             return;
         }
@@ -133,6 +134,7 @@ public class CmdExecutor implements CommandExecutor {
         sender.sendMessage("help: view command info");
         sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
+        //TO DO MOBTYPES
     }
     private void onDebugCommand(CommandSender sender){// TO DO move to separate class
         ArrayList<String> msgs = new ArrayList<>();
@@ -190,33 +192,33 @@ public class CmdExecutor implements CommandExecutor {
                     .count();
             LongHashSet worldMonsterBlackList = controller.getListener().getWhitelistMonstersImmutable(world);
             worldMonsterBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> worldAnimalBlackList.contains(
+                    .filter(chunk -> worldMonsterBlackList.contains(
                             LongHash.toLong(chunk.getX(), chunk.getZ())))
                     .count();
             LongHashSet worldAmbientBlackList = controller.getListener().getWhitelistAmbientImmutable(world);
             worldAmbientBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> worldAnimalBlackList.contains(
+                    .filter(chunk -> worldAmbientBlackList.contains(
                             LongHash.toLong(chunk.getX(), chunk.getZ())))
                     .count();
             LongHashSet worldWatermobsBlackList = controller.getListener().getWhitelistWatermobsImmutable(world);
             worldWatermobBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> worldAnimalBlackList.contains(
+                    .filter(chunk -> worldWatermobsBlackList.contains(
                             LongHash.toLong(chunk.getX(), chunk.getZ())))
                     .count();
 
             for(Player player : world.getPlayers()){
-                Stream<Entity> playerEntities = player.getNearbyEntities(radius, radius, radius).stream();
+                List<Entity> playerEntities = player.getNearbyEntities(radius, radius, radius);
 
-                playerAnimalCount = playerEntities
+                playerAnimalCount = playerEntities.stream()
                         .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
                         .count();
-                playerMonsterCount = playerEntities
+                playerMonsterCount = playerEntities.stream()
                         .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                         .count();
-                playerAmbientCount = playerEntities
+                playerAmbientCount = playerEntities.stream()
                         .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
                         .count();
-                playerWatermobCount = playerEntities
+                playerWatermobCount = playerEntities.stream()
                         .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
                         .count();
 
@@ -235,18 +237,18 @@ public class CmdExecutor implements CommandExecutor {
                         playerAmbientCount, playerAmbientLimit,
                         playerWatermobCount, playerWatermobLimit));
             }
-            Stream<Entity> worldEntities = world.getEntities().stream();
+            List<Entity> worldEntities = world.getEntities();
 
-            worldAnimalCount = worldEntities
+            worldAnimalCount = worldEntities.stream()
                     .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
                     .count();
-            worldMonsterCount = worldEntities
+            worldMonsterCount = worldEntities.stream()
                     .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                     .count();
-            worldAmbientCount = worldEntities
+            worldAmbientCount = worldEntities.stream()
                     .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
                     .count();
-            worldWatermobCount = worldEntities
+            worldWatermobCount = worldEntities.stream()
                     .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
                     .count();
 
