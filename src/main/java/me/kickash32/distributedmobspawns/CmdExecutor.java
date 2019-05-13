@@ -12,6 +12,7 @@ import org.eclipse.collections.impl.set.mutable.primitive.LongHashSet;
 import util.LongHash;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class CmdExecutor implements CommandExecutor {
     private DistributedMobSpawns controller;
@@ -133,55 +134,134 @@ public class CmdExecutor implements CommandExecutor {
         sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
     }
-    private void onDebugCommand(CommandSender sender){// TO DO
+    private void onDebugCommand(CommandSender sender){// TO DO move to separate class
         ArrayList<String> msgs = new ArrayList<>();
         Server server = controller.getServer();
-        long worldMonsters;
-        long playerMonsters;
-        long worldLimit;
-        long playerLimit;
-        int radius;
+        int radius = controller.getSpawnRange()*16;
         Chunk[] worldChunks;
-        LongHashSet worldBlackList;
-        long worldBlackListSize;
+
+        long playerAnimalCount;
+        long playerAnimalLimit;
+        long worldAnimalCount;
+        long worldAnimalLimit;
+        long worldAnimalBlackListSize;
+
+        long playerMonsterCount;
+        long playerMonsterLimit;
+        long worldMonsterLimit;
+        long worldMonsterCount;
+        long worldMonsterBlackListSize;
+
+        long playerAmbientCount;
+        long playerAmbientLimit;
+        long worldAmbientLimit;
+        long worldAmbientCount;
+        long worldAmbientBlackListSize;
+
+        long playerWatermobCount;
+        long playerWatermobLimit;
+        long worldWatermobLimit;
+        long worldWatermobCount;
+        long worldWatermobBlackListSize;
+
 
         msgs.add("[Distributed Mob Spawns]");
-        msgs.add("Format: [world] player: #monsters/Limit*");
-        msgs.add("");
+        msgs.add("Format: [world] player: #Animal/Animal_Limit* #Monster/Monster_Limit* #Ambient/Ambient_Limit* #Watermob/Watermob_Limit*");
+        msgs.add("These should only be used as a reference for troubleshooting");
 
         String prefix;
-        String separator = ": ";
+        String separator = ":";
         String prefixColor = "";
 
         for(World world : server.getWorlds()){
             prefix = String.format("%s[%s]", prefixColor, world.getName());
 
-            worldLimit = 0;
-            worldChunks = world.getLoadedChunks();
-            worldBlackList = controller.getListener().getWhitelistMonstersImmutable(world);
+            worldAnimalLimit = 0;
+            worldMonsterLimit = 0;
+            worldAmbientLimit = 0;
+            worldWatermobLimit = 0;
 
-            LongHashSet finalWorldBlackList = worldBlackList;
-            worldBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> finalWorldBlackList.contains(
+            worldChunks = world.getLoadedChunks();
+
+            LongHashSet worldAnimalBlackList = controller.getListener().getWhitelistAnimalsImmutable(world);
+            worldAnimalBlackListSize = Arrays.stream(worldChunks)
+                    .filter(chunk -> worldAnimalBlackList.contains(
+                            LongHash.toLong(chunk.getX(), chunk.getZ())))
+                    .count();
+            LongHashSet worldMonsterBlackList = controller.getListener().getWhitelistMonstersImmutable(world);
+            worldMonsterBlackListSize = Arrays.stream(worldChunks)
+                    .filter(chunk -> worldAnimalBlackList.contains(
+                            LongHash.toLong(chunk.getX(), chunk.getZ())))
+                    .count();
+            LongHashSet worldAmbientBlackList = controller.getListener().getWhitelistAmbientImmutable(world);
+            worldAmbientBlackListSize = Arrays.stream(worldChunks)
+                    .filter(chunk -> worldAnimalBlackList.contains(
+                            LongHash.toLong(chunk.getX(), chunk.getZ())))
+                    .count();
+            LongHashSet worldWatermobsBlackList = controller.getListener().getWhitelistWatermobsImmutable(world);
+            worldWatermobBlackListSize = Arrays.stream(worldChunks)
+                    .filter(chunk -> worldAnimalBlackList.contains(
                             LongHash.toLong(chunk.getX(), chunk.getZ())))
                     .count();
 
             for(Player player : world.getPlayers()){
-                playerMonsters = player.getNearbyEntities(128, 128, 128).stream()
+                Stream<Entity> playerEntities = player.getNearbyEntities(radius, radius, radius).stream();
+
+                playerAnimalCount = playerEntities
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
+                        .count();
+                playerMonsterCount = playerEntities
                         .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                         .count();
-                playerLimit = controller.getMobCapMonsters(world);
-                worldLimit += playerLimit;//overestimation
+                playerAmbientCount = playerEntities
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
+                        .count();
+                playerWatermobCount = playerEntities
+                        .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
+                        .count();
 
-                msgs.add(String.format("%s %s%s%d/%d", prefix, player.getDisplayName(), separator, playerMonsters, playerLimit));
+                playerAnimalLimit = controller.getMobCapAnimals(world);
+                worldAnimalLimit += playerAnimalLimit;//overestimation
+                playerMonsterLimit = controller.getMobCapMonsters(world);
+                worldMonsterLimit += playerMonsterLimit;//overestimation
+                playerAmbientLimit = controller.getMobCapAmbient(world);
+                worldAmbientLimit += playerAmbientLimit;//overestimation
+                playerWatermobLimit = controller.getMobCapWatermobs(world);
+                worldWatermobLimit += playerWatermobLimit;//overestimation
+
+                msgs.add(String.format("%s %s%s %d/%d %d/%d %d/%d %d/%d", prefix, player.getDisplayName(), separator,
+                        playerAnimalCount, playerAnimalLimit,
+                        playerMonsterCount, playerMonsterLimit,
+                        playerAmbientCount, playerAmbientLimit,
+                        playerWatermobCount, playerWatermobLimit));
             }
-            worldLimit = Math.min(worldLimit, world.getMonsterSpawnLimit()*worldChunks.length/(17*17));
-            worldMonsters = world.getEntities().stream()
+            Stream<Entity> worldEntities = world.getEntities().stream();
+
+            worldAnimalCount = worldEntities
+                    .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
+                    .count();
+            worldMonsterCount = worldEntities
                     .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                     .count();
+            worldAmbientCount = worldEntities
+                    .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
+                    .count();
+            worldWatermobCount = worldEntities
+                    .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
+                    .count();
 
-            msgs.add(String.format("%s %s%s%d/%d", prefix, "Total", separator, worldMonsters, worldLimit));
-            msgs.add(String.format("%s %s%s%d/%d", prefix, "Whitelist size", separator, worldBlackListSize, worldChunks.length));
+            msgs.add(String.format("%s %s%s %d/%d %d/%d %d/%d %d/%d", prefix, "Total", separator,
+                    worldAnimalCount, worldAnimalLimit,
+                    worldMonsterCount, worldMonsterLimit,
+                    worldAmbientCount, worldAmbientLimit,
+                    worldWatermobCount, worldWatermobLimit));
+
+
+            msgs.add(String.format("%s %s%s %d/%d  %d/%d  %d/%d  %d/%d", prefix, "Whitelist size", separator,
+                    worldAnimalBlackListSize, worldChunks.length,
+                    worldMonsterBlackListSize, worldChunks.length,
+                    worldAmbientBlackListSize, worldChunks.length,
+                    worldWatermobBlackListSize, worldChunks.length));
         }
 
         sender.sendMessage(msgs.toArray(new String[0]));
