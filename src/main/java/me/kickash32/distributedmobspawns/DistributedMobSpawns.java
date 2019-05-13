@@ -2,9 +2,8 @@ package me.kickash32.distributedmobspawns;
 
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.EntityType;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import java.util.HashMap;
 import java.util.Timer;
 
@@ -54,7 +53,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.saveDefaultConfig();
         this.buffer = Math.max(config.getInt("buffer", 0), 0);
         this.spawnRange = config.getInt("mob-spawn-range", 6);
-        if(config.getBoolean("adjust-spawn-limits-for-range", true))
+        if(config.getBoolean("adjust-spawn-limits-for-range", false))
             { adjustLimits(); }
         else
             { adjustCaps(); }
