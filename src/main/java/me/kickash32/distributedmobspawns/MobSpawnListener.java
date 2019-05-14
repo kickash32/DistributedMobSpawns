@@ -257,7 +257,9 @@ public class MobSpawnListener implements Listener {
     static boolean isNaturallySpawningAnimal(Entity entity){
         if (entity == null) { return false; }
         return isAnimal(entity.getType()) &&
-                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+                (entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)||
+                 entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.CHUNK_GEN)
+                );
     }
     static boolean isAnimal(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
