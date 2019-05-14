@@ -1,6 +1,5 @@
 package me.kickash32.distributedmobspawns;
 
-import com.destroystokyo.paper.event.entity.PlayerNaturallySpawnCreaturesEvent;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
