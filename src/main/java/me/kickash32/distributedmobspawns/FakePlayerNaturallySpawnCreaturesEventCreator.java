@@ -19,6 +19,7 @@ public class FakePlayerNaturallySpawnCreaturesEventCreator extends TimerTask {
             MobSpawnListener msl = controller.getListener();
             Server server = controller.getServer();
 
+            msl.cull();
             msl.reset();
             for (World world : server.getWorlds()) {
                 for (Player player : world.getPlayers()){

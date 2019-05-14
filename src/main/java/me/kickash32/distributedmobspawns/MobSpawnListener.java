@@ -14,10 +14,15 @@ import java.util.*;
 
 public class MobSpawnListener implements Listener {
     private DistributedMobSpawns controller;
-    private HashMap<World, LongHashSet> whiteListsAnimals;//Each world has its own whitelist of chunks(stored as a set of location hashes) where monsters can spawn
-    private HashMap<World, LongHashSet> whiteListsMonsters;
-    private HashMap<World, LongHashSet> whiteListsAmbient;
-    private HashMap<World, LongHashSet> whiteListsWatermobs;
+    private Map<World, LongHashSet> whiteListsAnimals;//Each world has its own whitelist of chunks(stored as a set of location hashes) where monsters can spawn
+    private Map<World, LongHashSet> whiteListsMonsters;
+    private Map<World, LongHashSet> whiteListsAmbient;
+    private Map<World, LongHashSet> whiteListsWatermobs;
+
+    private HashMap<World, List<Entity>> newAnimals;
+    private HashMap<World, List<Entity>> newMonsters;
+    private HashMap<World, List<Entity>> newAmbient;
+    private HashMap<World, List<Entity>> newWatermobs;
 
     MobSpawnListener(DistributedMobSpawns controller){
         this.controller = controller;
@@ -27,6 +32,11 @@ public class MobSpawnListener implements Listener {
         whiteListsMonsters = new HashMap<>();
         whiteListsAmbient = new HashMap<>();
         whiteListsWatermobs = new HashMap<>();
+
+        newAnimals = new HashMap<>();
+        newMonsters = new HashMap<>();
+        newAmbient = new HashMap<>();
+        newWatermobs = new HashMap<>();
         reset();
     }
 
@@ -36,6 +46,11 @@ public class MobSpawnListener implements Listener {
             whiteListsMonsters.put(world, new LongHashSet());
             whiteListsAmbient.put(world, new LongHashSet());
             whiteListsWatermobs.put(world, new LongHashSet());
+
+            newAnimals.put(world, new ArrayList<>());
+            newMonsters.put(world, new ArrayList<>());
+            newAmbient.put(world, new ArrayList<>());
+            newWatermobs.put(world, new ArrayList<>());
         }
     }
 
@@ -161,18 +176,25 @@ public class MobSpawnListener implements Listener {
         if (controller.isDisabled()){ return; }
 
         Location location = event.getLocation();
+        World world = location.getWorld();
         LongHashSet whitelist;
+        List<Entity> queue;
+
         if(isNaturallySpawningAnimal(event.getEntity())) {
-             whitelist = getWhiteListAnimals(location.getWorld());
+             whitelist = getWhiteListAnimals(world);
+             queue = newAnimals.get(world);
         }
         else if(isNaturallySpawningMonster(event.getEntity())) {
-            whitelist = getWhiteListMonsters(location.getWorld());
+            whitelist = getWhiteListMonsters(world);
+            queue = newMonsters.get(world);
         }
         else if(isNaturallySpawningAmbient(event.getEntity())) {
-            whitelist = getWhiteListAmbient(location.getWorld());
+            whitelist = getWhiteListAmbient(world);
+            queue = newAmbient.get(world);
         }
         else if(isNaturallySpawningWatermob(event.getEntity())) {
-            whitelist = getWhiteListWatermobs(location.getWorld());
+            whitelist = getWhiteListWatermobs(world);
+            queue = newWatermobs.get(world);
         }
         else{
             return;
@@ -183,6 +205,52 @@ public class MobSpawnListener implements Listener {
 
         if (!whitelist.contains(util.LongHash.toLong(chunkX, chunkZ))) {
             event.setCancelled(true);
+        }
+        else{
+            queue.add(event.getEntity());
+        }
+    }
+
+    private Player getNearestPlayer(Location location){
+        Player nearestPlayer = null;
+        double minDist = controller.getSpawnRange()*16;
+        for(Player player : location.getNearbyPlayers(controller.getSpawnRange()*16*2)){
+            if(location.distance(player.getLocation()) < minDist){
+                minDist = location.distance(player.getLocation());
+                nearestPlayer = player;
+            }
+        }
+        return nearestPlayer;
+    }
+
+    void cull(){
+        if(controller.isDisabled()){ return; }
+
+        List<Entity> queue;
+        for(World world : controller.getServer().getWorlds()){
+            queue = newAnimals.get(world);
+            Collections.shuffle(queue);
+            for(int i = controller.getMobCapAnimals(world)/2; i < queue.size(); i++){
+                queue.get(i).remove();
+            }
+
+            queue = newMonsters.get(world);
+            Collections.shuffle(queue);
+            for(int i = controller.getMobCapMonsters(world)/2; i < queue.size(); i++){
+                queue.get(i).remove();
+            }
+
+            queue = newAmbient.get(world);
+            Collections.shuffle(queue);
+            for(int i = controller.getMobCapAmbient(world)/2; i < queue.size(); i++){
+                queue.get(i).remove();
+            }
+
+            queue = newWatermobs.get(world);
+            Collections.shuffle(queue);
+            for(int i = controller.getMobCapWatermobs(world)/2; i < queue.size(); i++){
+                queue.get(i).remove();
+            }
         }
     }
 
