@@ -6,7 +6,7 @@
 
     <groupId>me.kickash32</groupId>
     <artifactId>DistributedMobSpawns</artifactId>
-    <version>1.0.1</version>
+    <version>1.3.0</version>
     <packaging>jar</packaging>
 
     <name>DistributedMobSpawns</name>
@@ -38,7 +38,19 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <minimizeJar>true</minimizeJar>
+                            <minimizeJar>
+                                true
+                            </minimizeJar>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
