@@ -97,6 +97,7 @@ public class MobSpawnListener implements Listener {
     @EventHandler
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
         if (controller.isDisabled()){ return; }
+        if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL){ return; }
 
         World world = event.getLocation().getWorld();
 
@@ -114,10 +115,23 @@ public class MobSpawnListener implements Listener {
         }
     }
 
+    public List<Player> getNearbyPlayers(Location loc, int distance)
+    {
+        int distanceSquared = distance*distance;
+
+        List<Player> list = new ArrayList<>();
+        for(Player player: loc.getWorld().getPlayers()) {
+            if (player.getLocation().distanceSquared(loc) < distanceSquared) {
+                list.add(player);
+            }
+        }
+        return list;
+    }
+
     private Collection<Player> getPlayersInSquareRange(Location location, int rangeChunks){
         int range = rangeChunks * 16;
 
-        Collection<Player> playerCollection = location.getNearbyPlayers(rangeChunks*23);
+        Collection<Player> playerCollection = getNearbyPlayers(location,rangeChunks*23);
 
         Iterator<Player> iterator = playerCollection.iterator();
         Player player;
@@ -192,10 +206,7 @@ public class MobSpawnListener implements Listener {
 
     static boolean isNaturallySpawningAnimal(Entity entity){
         if (entity == null) { return false; }
-        return isAnimal(entity.getType()) &&
-                (entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)||
-                 entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.CHUNK_GEN)
-                );
+        return isAnimal(entity.getType());
     }
     static boolean isAnimal(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
@@ -205,8 +216,7 @@ public class MobSpawnListener implements Listener {
 
     static boolean isNaturallySpawningMonster(Entity entity){
         if (entity == null) { return false; }
-        return isMonster(entity.getType()) &&
-                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+        return isMonster(entity.getType());
     }
     static boolean isMonster(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
@@ -220,8 +230,7 @@ public class MobSpawnListener implements Listener {
 
     static boolean isNaturallySpawningAmbient(Entity entity){
         if (entity == null) { return false; }
-        return isAmbient(entity.getType()) &&
-                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+        return isAmbient(entity.getType());
     }
     static boolean isAmbient(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
@@ -231,8 +240,7 @@ public class MobSpawnListener implements Listener {
 
     static boolean isNaturallySpawningWatermob(Entity entity){
         if (entity == null) { return false; }
-        return isWatermob(entity.getType()) &&
-                entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+        return isWatermob(entity.getType());
     }
     static boolean isWatermob(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
