@@ -9,7 +9,6 @@ import java.util.Timer;
 
 public final class DistributedMobSpawns extends JavaPlugin {
     private boolean disabled;
-    private boolean runningPaper;
     private HashMap<World, Integer> mobCapsAnimals;
     private HashMap<World, Integer> mobCapsMonsters;
     private HashMap<World, Integer> mobCapsAmbient;
@@ -19,7 +18,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
     private CmdExecutor cmdEx;
     private Timer fakeEventGen;
 
-    private int buffer;//variance allowed for number of mobs around players
     private int spawnRange;
 
     @Override
@@ -28,7 +26,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.msl = new MobSpawnListener(this);
         this.cmdEx = new CmdExecutor(this);
         this.disabled = false;
-        this.runningPaper = false;
 
         mobCapsAnimals = new HashMap<>();
         mobCapsMonsters = new HashMap<>();
@@ -50,7 +47,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
     void loadConfig(){
         FileConfiguration config = this.getConfig();
         this.saveDefaultConfig();
-        this.buffer = Math.max(config.getInt("buffer", 0), 0);
         this.spawnRange = config.getInt("mob-spawn-range", 6);
         if(config.getBoolean("adjust-spawn-limits-for-range", false))
             { adjustLimits(); }
@@ -62,20 +58,20 @@ public final class DistributedMobSpawns extends JavaPlugin {
         int tmp;
         for(World world : this.getServer().getWorlds()){
             tmp = (int)(0.0+getMobCapAnimals(world) * 289 / chunksInRadius(spawnRange));
-            System.out.println("Set Animal limit to: "+tmp+" was: "+getMobCapAnimals(world)+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Animal limit to: "+tmp+" was: "+getMobCapAnimals(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setAnimalSpawnLimit(tmp);
 
             tmp = (int)(0.0+getMobCapMonsters(world) * 289 / chunksInRadius(spawnRange));
-            System.out.println("Set Monster limit to: "+tmp+" was: "+getMobCapMonsters(world)+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Monster limit to: "+tmp+" was: "+getMobCapMonsters(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setMonsterSpawnLimit(tmp);
 
             tmp = (int)(0.0+getMobCapAmbient(world) * 289 / chunksInRadius(spawnRange));
-            System.out.println("Set Ambient limit to: "+tmp+" was: "+getMobCapAmbient(world)+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Ambient limit to: "+tmp+" was: "+getMobCapAmbient(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setAmbientSpawnLimit(tmp);
 
 
             tmp = (int)(0.0+getMobCapWatermobs(world) * 289 / chunksInRadius(spawnRange));
-            System.out.println("Set Watermobs limit to: "+tmp+" was: "+getMobCapWatermobs(world)+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Watermobs limit to: "+tmp+" was: "+getMobCapWatermobs(world)+" with radius: "+spawnRange + " in "+world.getName());
             world.setWaterAnimalSpawnLimit(tmp);
 
         }
@@ -86,19 +82,19 @@ public final class DistributedMobSpawns extends JavaPlugin {
         for(World world : this.getServer().getWorlds()){
             tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapAnimals(world)/289);
             mobCapsAnimals.put(world, tmp);
-            System.out.println("Set Animals mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Animals mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
 
             tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapMonsters(world)/289);
             mobCapsMonsters.put(world, tmp);
-            System.out.println("Set Monsters mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Monsters mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
 
             tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapAmbient(world)/289);
             mobCapsAmbient.put(world, tmp);
-            System.out.println("Set Ambient mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Ambient mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
 
             tmp = (int)(0.0+chunksInRadius(spawnRange) * getMobCapWatermobs(world)/289);
             mobCapsWatermobs.put(world, tmp);
-            System.out.println("Set Watermobs mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
+            System.out.println("[DMS] Set Watermobs mobcap to: "+tmp+" with radius: "+spawnRange + " in "+world.getName());
         }
     }
 
@@ -129,30 +125,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
     int getSpawnRange(){
         return spawnRange;
-    }
-
-    int getBuffer(){
-        return buffer;
-    }
-
-    boolean setBuffer(int x){
-        if(x >= 0) {
-            buffer = x;
-            return true;
-        }
-        else { return false; }
-    }
-
-    boolean runningOnPaper(){
-        return runningPaper;
-    }
-
-    void serverPaperDetected(){
-        if(!runningOnPaper()) {
-            runningPaper = true;
-            System.out.println("[DMS] Detected Paper");
-            fakeEventGen.cancel();
-        }
     }
 
     boolean isDisabled(){

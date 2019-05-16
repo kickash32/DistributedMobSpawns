@@ -19,7 +19,7 @@ public class FakePlayerNaturallySpawnCreaturesEventCreator extends TimerTask {
             MobSpawnListener msl = controller.getListener();
             Server server = controller.getServer();
 
-            msl.cull();
+            msl.processQueues();
             msl.reset();
             for (World world : server.getWorlds()) {
                 for (Player player : world.getPlayers()){
@@ -30,7 +30,7 @@ public class FakePlayerNaturallySpawnCreaturesEventCreator extends TimerTask {
             }
         }
         catch(Exception ex){
-            System.out.println("error running thread " + ex.getMessage());
+            //System.out.println("[DMS] error running thread " + ex.getMessage());
         }
     }
 }

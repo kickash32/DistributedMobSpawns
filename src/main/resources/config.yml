@@ -1,6 +1,5 @@
-#buffer is the maximum number of extra mobs allowed to a player's region
 #mob-spawn-range should be exactly the same as in spigot.yml
-#adjust-spawn-limits-for-range should be set to true if the number of monsters per player should be independent of range (in spigot and paper by default it is lower)
-buffer: 0
+# MAKE SURE YOU ADJUST THIS
 mob-spawn-range: 6
+#adjust-spawn-limits-for-range should be set to true if the number of monsters per player should be independent of range (in spigot and paper by default it is lower)
 adjust-spawn-limits-for-range: false

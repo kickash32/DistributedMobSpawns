@@ -1,6 +1,5 @@
 package me.kickash32.distributedmobspawns;
 
-import org.bukkit.Chunk;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -8,11 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.eclipse.collections.impl.set.mutable.primitive.LongHashSet;
-import util.LongHash;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CmdExecutor implements CommandExecutor {
@@ -28,9 +24,6 @@ public class CmdExecutor implements CommandExecutor {
         String subCmd = args[0].toLowerCase();
 
         switch (subCmd) {
-            case "setbuffer":
-                onSetBufferCommand(sender, args);
-                break;
             case "butcher":
                 onButcherCommand(sender, args);
                 break;
@@ -51,22 +44,6 @@ public class CmdExecutor implements CommandExecutor {
                 return false;
         }
         return true;
-    }
-
-    private void onSetBufferCommand(CommandSender sender, String[] args) {
-        int size;
-        try{
-            size = Integer.parseInt(args[1]);
-        }catch (NumberFormatException e){
-            size = -1;
-        }
-        boolean tmp = controller.setBuffer(size);
-        if (tmp){
-            sender.sendMessage("Successfully updated buffer amount");
-        }
-        else{
-            sender.sendMessage("Failed to change buffer. Enter a positive buffer size.");
-        }
     }
 
     private void onButcherCommand(CommandSender sender, String[] args) {
@@ -129,7 +106,6 @@ public class CmdExecutor implements CommandExecutor {
     private void onHelpCommand(CommandSender sender){
         sender.sendMessage("[DMS] command list");
         sender.sendMessage("butcher {mobtype}: kill all mobs of {mobtype} from the current world");
-        sender.sendMessage("setbuffer {pos integer}: change the variance of the mobcap");
         sender.sendMessage("stats: view distribution of monsters");
         sender.sendMessage("help: view command info");
         sender.sendMessage("reload: reload configuration from file");
@@ -140,31 +116,26 @@ public class CmdExecutor implements CommandExecutor {
         ArrayList<String> msgs = new ArrayList<>();
         Server server = controller.getServer();
         int radius = controller.getSpawnRange()*16;
-        Chunk[] worldChunks;
 
         long playerAnimalCount;
         long playerAnimalLimit;
         long worldAnimalCount;
         long worldAnimalLimit;
-        long worldAnimalBlackListSize;
 
         long playerMonsterCount;
         long playerMonsterLimit;
         long worldMonsterLimit;
         long worldMonsterCount;
-        long worldMonsterBlackListSize;
 
         long playerAmbientCount;
         long playerAmbientLimit;
         long worldAmbientLimit;
         long worldAmbientCount;
-        long worldAmbientBlackListSize;
 
         long playerWatermobCount;
         long playerWatermobLimit;
         long worldWatermobLimit;
         long worldWatermobCount;
-        long worldWatermobBlackListSize;
 
 
         msgs.add("[Distributed Mob Spawns]");
@@ -182,29 +153,6 @@ public class CmdExecutor implements CommandExecutor {
             worldMonsterLimit = 0;
             worldAmbientLimit = 0;
             worldWatermobLimit = 0;
-
-            worldChunks = world.getLoadedChunks();
-
-            LongHashSet worldAnimalBlackList = controller.getListener().getWhitelistAnimalsImmutable(world);
-            worldAnimalBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> worldAnimalBlackList.contains(
-                            LongHash.toLong(chunk.getX(), chunk.getZ())))
-                    .count();
-            LongHashSet worldMonsterBlackList = controller.getListener().getWhitelistMonstersImmutable(world);
-            worldMonsterBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> worldMonsterBlackList.contains(
-                            LongHash.toLong(chunk.getX(), chunk.getZ())))
-                    .count();
-            LongHashSet worldAmbientBlackList = controller.getListener().getWhitelistAmbientImmutable(world);
-            worldAmbientBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> worldAmbientBlackList.contains(
-                            LongHash.toLong(chunk.getX(), chunk.getZ())))
-                    .count();
-            LongHashSet worldWatermobsBlackList = controller.getListener().getWhitelistWatermobsImmutable(world);
-            worldWatermobBlackListSize = Arrays.stream(worldChunks)
-                    .filter(chunk -> worldWatermobsBlackList.contains(
-                            LongHash.toLong(chunk.getX(), chunk.getZ())))
-                    .count();
 
             for(Player player : world.getPlayers()){
                 List<Entity> playerEntities = player.getNearbyEntities(radius, radius, radius);
@@ -257,13 +205,6 @@ public class CmdExecutor implements CommandExecutor {
                     worldMonsterCount, worldMonsterLimit,
                     worldAmbientCount, worldAmbientLimit,
                     worldWatermobCount, worldWatermobLimit));
-
-
-            msgs.add(String.format("%s %s%s %d/%d  %d/%d  %d/%d  %d/%d", prefix, "Whitelist size", separator,
-                    worldAnimalBlackListSize, worldChunks.length,
-                    worldMonsterBlackListSize, worldChunks.length,
-                    worldAmbientBlackListSize, worldChunks.length,
-                    worldWatermobBlackListSize, worldChunks.length));
         }
 
         sender.sendMessage(msgs.toArray(new String[0]));
