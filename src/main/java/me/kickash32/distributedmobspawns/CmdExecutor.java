@@ -47,7 +47,7 @@ public class CmdExecutor implements CommandExecutor {
     }
 
     private void onButcherCommand(CommandSender sender, String[] args) {
-        if (args == null || args[1] == null) {//CHECK ARRAY LENGTH
+        if (args == null || args.length < 2 ||args[1] == null) {
             sender.sendMessage("Unknown mobtype, see help");
             return;
         }
@@ -65,27 +65,36 @@ public class CmdExecutor implements CommandExecutor {
         switch (args[1].toLowerCase()){
             case "animals":
                 entityList.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
+                        .filter(entity -> Util.isNaturallySpawningAnimal(entity))
                         .forEach(entity -> entity.remove());
                 sender.sendMessage("Successfully killed all animals");
                 break;
-            case "monster":
+            case "monsters":
                 entityList.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
+                        .filter(entity -> Util.isNaturallySpawningMonster(entity))
                         .forEach(entity -> entity.remove());
                 sender.sendMessage("Successfully killed all monsters");
                 break;
-            case "ambient":
+            case "ambients":
                 entityList.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
+                        .filter(entity -> Util.isNaturallySpawningAmbient(entity))
                         .forEach(entity -> entity.remove());
                 sender.sendMessage("Successfully killed all ambient mobs");
                 break;
             case "watermobs":
                 entityList.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
+                        .filter(entity -> Util.isNaturallySpawningWatermob(entity))
                         .forEach(entity -> entity.remove());
                 sender.sendMessage("Successfully killed all watermobs");
+                break;
+            case "all":
+                entityList.stream()
+                        .filter(entity -> Util.isNaturallySpawningAnimal(entity)||
+                                Util.isNaturallySpawningMonster(entity)||
+                                Util.isNaturallySpawningAmbient(entity)||
+                                Util.isNaturallySpawningWatermob(entity))
+                        .forEach(entity -> entity.remove());
+                sender.sendMessage("Successfully killed all mobs");
                 break;
             default:
                 sender.sendMessage("Unknown entity type, try animals, monster, ambient, watermobs");
@@ -110,7 +119,7 @@ public class CmdExecutor implements CommandExecutor {
         sender.sendMessage("help: view command info");
         sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
-        //TO DO MOBTYPES
+        sender.sendMessage("Supported [animals] [monsters] [ambients] [watermobs] [all]");
     }
     private void onDebugCommand(CommandSender sender){// TO DO move to separate class
         ArrayList<String> msgs = new ArrayList<>();
@@ -158,16 +167,16 @@ public class CmdExecutor implements CommandExecutor {
                 List<Entity> playerEntities = player.getNearbyEntities(radius, radius, radius);
 
                 playerAnimalCount = playerEntities.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
+                        .filter(entity -> Util.isNaturallySpawningAnimal(entity))
                         .count();
                 playerMonsterCount = playerEntities.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
+                        .filter(entity -> Util.isNaturallySpawningMonster(entity))
                         .count();
                 playerAmbientCount = playerEntities.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
+                        .filter(entity -> Util.isNaturallySpawningAmbient(entity))
                         .count();
                 playerWatermobCount = playerEntities.stream()
-                        .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
+                        .filter(entity -> Util.isNaturallySpawningWatermob(entity))
                         .count();
 
                 playerAnimalLimit = controller.getMobCapAnimals(world);
@@ -188,16 +197,16 @@ public class CmdExecutor implements CommandExecutor {
             List<Entity> worldEntities = world.getEntities();
 
             worldAnimalCount = worldEntities.stream()
-                    .filter(entity -> MobSpawnListener.isNaturallySpawningAnimal(entity))
+                    .filter(entity -> Util.isNaturallySpawningAnimal(entity))
                     .count();
             worldMonsterCount = worldEntities.stream()
-                    .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
+                    .filter(entity -> Util.isNaturallySpawningMonster(entity))
                     .count();
             worldAmbientCount = worldEntities.stream()
-                    .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
+                    .filter(entity -> Util.isNaturallySpawningAmbient(entity))
                     .count();
             worldWatermobCount = worldEntities.stream()
-                    .filter(entity -> MobSpawnListener.isNaturallySpawningWatermob(entity))
+                    .filter(entity -> Util.isNaturallySpawningWatermob(entity))
                     .count();
 
             msgs.add(String.format("%s %s%s %d/%d %d/%d %d/%d %d/%d", prefix, "Total", separator,

@@ -1,6 +1,10 @@
 name: DistributedMobSpawns
 version: 2.0.0
 main: me.kickash32.distributedmobspawns.DistributedMobSpawns
+api-version: 1.13
+prefix: DMS
+author: kickash32
+load: POSTWORLD
 commands:
   dms:
     description: Configure and test DistributedMobSpawns
