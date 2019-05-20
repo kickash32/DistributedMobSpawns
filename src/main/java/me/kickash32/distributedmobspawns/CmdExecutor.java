@@ -69,13 +69,13 @@ public class CmdExecutor implements CommandExecutor {
                         .forEach(entity -> entity.remove());
                 sender.sendMessage("Successfully killed all animals");
                 break;
-            case "monster":
+            case "monsters":
                 entityList.stream()
                         .filter(entity -> MobSpawnListener.isNaturallySpawningMonster(entity))
                         .forEach(entity -> entity.remove());
                 sender.sendMessage("Successfully killed all monsters");
                 break;
-            case "ambient":
+            case "ambients":
                 entityList.stream()
                         .filter(entity -> MobSpawnListener.isNaturallySpawningAmbient(entity))
                         .forEach(entity -> entity.remove());
@@ -110,7 +110,7 @@ public class CmdExecutor implements CommandExecutor {
         sender.sendMessage("help: view command info");
         sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
-        //TO DO MOBTYPES
+        sender.sendMessage("Supported [animals] [monsters] [ambients] [watermobs] [all]");
     }
     private void onDebugCommand(CommandSender sender){// TO DO move to separate class
         ArrayList<String> msgs = new ArrayList<>();
