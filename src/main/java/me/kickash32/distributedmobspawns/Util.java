@@ -2,6 +2,7 @@ package me.kickash32.distributedmobspawns;
 
 import org.bukkit.Location;
 import org.bukkit.entity.*;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +52,7 @@ public class Util {
 
     static boolean isNaturallySpawningAnimal(Entity entity){
         if (entity == null) { return false; }
-        return isAnimal(entity.getType());
+        return isAnimal(entity.getType()) && wasNaturallySpawned(entity);
     }
     static boolean isAnimal(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
@@ -61,7 +62,7 @@ public class Util {
 
     static boolean isNaturallySpawningMonster(Entity entity){
         if (entity == null) { return false; }
-        return isMonster(entity.getType());
+        return isMonster(entity.getType()) && wasNaturallySpawned(entity);
     }
     static boolean isMonster(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
@@ -75,7 +76,7 @@ public class Util {
 
     static boolean isNaturallySpawningAmbient(Entity entity){
         if (entity == null) { return false; }
-        return isAmbient(entity.getType());
+        return isAmbient(entity.getType()) && wasNaturallySpawned(entity);
     }
     static boolean isAmbient(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
@@ -85,11 +86,20 @@ public class Util {
 
     static boolean isNaturallySpawningWatermob(Entity entity){
         if (entity == null) { return false; }
-        return isWatermob(entity.getType());
+        return isWatermob(entity.getType()) && wasNaturallySpawned(entity);
     }
     static boolean isWatermob(EntityType type){
         if (type == EntityType.UNKNOWN || type == null) { return false; }
         Class c = type.getEntityClass();
         return WaterMob.class.isAssignableFrom(c);
+    }
+
+    private static boolean wasNaturallySpawned(Entity entity){
+        try{
+            Class.forName("com.destroystokyo.paper.event.entity.PlayerNaturallySpawnCreaturesEvent");
+            return entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+        }catch (ClassNotFoundException e) {
+            return true;
+        }
     }
 }
