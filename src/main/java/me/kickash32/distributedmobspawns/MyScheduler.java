@@ -19,7 +19,6 @@ public class MyScheduler extends TimerTask {
             MobListener msl = controller.getListener();
             Server server = controller.getServer();
 
-            msl.processQueues();
             for (World world : server.getWorlds()) {
                 for (Player player : world.getPlayers()){
                     if (!player.getGameMode().equals(GameMode.SPECTATOR)) {
