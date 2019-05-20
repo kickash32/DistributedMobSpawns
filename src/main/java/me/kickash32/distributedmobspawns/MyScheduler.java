@@ -6,21 +6,20 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import java.util.TimerTask;
 
-public class FakePlayerNaturallySpawnCreaturesEventCreator extends TimerTask {
+public class MyScheduler extends TimerTask {
     private DistributedMobSpawns controller;
 
 
-    FakePlayerNaturallySpawnCreaturesEventCreator(DistributedMobSpawns controller) {
+    MyScheduler(DistributedMobSpawns controller) {
         this.controller = controller;
     }
 
     public void run() {
         try {
-            MobSpawnListener msl = controller.getListener();
+            MobListener msl = controller.getListener();
             Server server = controller.getServer();
 
             msl.processQueues();
-            msl.reset();
             for (World world : server.getWorlds()) {
                 for (Player player : world.getPlayers()){
                     if (!player.getGameMode().equals(GameMode.SPECTATOR)) {
@@ -30,7 +29,8 @@ public class FakePlayerNaturallySpawnCreaturesEventCreator extends TimerTask {
             }
         }
         catch(Exception ex){
-            //System.out.println("[DMS] error running thread " + ex.getMessage());
+            System.out.println("[DMS] error running thread ");
+            ex.printStackTrace();
         }
     }
 }
