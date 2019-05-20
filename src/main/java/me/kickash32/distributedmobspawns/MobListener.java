@@ -150,7 +150,7 @@ public class MobListener implements Listener {
         boolean anyFull = false;
         Collection<Player> players = Util.getPlayersInSquareRange(entity.getLocation(), controller.getSpawnRange());
         for(Player player: players){
-            if(proximityMap.get(player) >= mobCap){
+            if(proximityMap.get(player) > mobCap){
                 anyFull = true;
             }
         }
