@@ -47,7 +47,7 @@ public class CmdExecutor implements CommandExecutor {
     }
 
     private void onButcherCommand(CommandSender sender, String[] args) {
-        if (args == null || args[1] == null) {//CHECK ARRAY LENGTH
+        if (args == null || args.length < 2 ||args[1] == null) {
             sender.sendMessage("Unknown mobtype, see help");
             return;
         }
