@@ -3,15 +3,14 @@ package me.kickash32.distributedmobspawns;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 
 public class MobListener implements Listener {
@@ -22,15 +21,30 @@ public class MobListener implements Listener {
     private Map<Player, Integer> proximityAmbients;
     private Map<Player, Integer> proximityWatermobs;
 
+    private Map<World, Queue<Entity>> spawnQueueAnimals;
+    private Map<World, Queue<Entity>> spawnQueueMonsters;
+    private Map<World, Queue<Entity>> spawnQueueAmbients;
+    private Map<World, Queue<Entity>> spawnQueueWatermobs;
+
     MobListener(DistributedMobSpawns controller){
         this.controller = controller;
         controller.getServer().getPluginManager().registerEvents(this, controller);
+
+        spawnQueueAnimals = new HashMap<>();
+        spawnQueueMonsters = new HashMap<>();
+        spawnQueueAmbients = new HashMap<>();
+        spawnQueueWatermobs = new HashMap<>();
 
         for(World world : controller.getServer().getWorlds()){
             proximityAnimals = new ConcurrentHashMap<>();
             proximityMonsters = new ConcurrentHashMap<>();
             proximityAmbients = new ConcurrentHashMap<>();
             proximityWatermobs = new ConcurrentHashMap<>();
+
+            spawnQueueAnimals.put(world, new ConcurrentLinkedDeque<>());
+            spawnQueueMonsters.put(world, new ConcurrentLinkedDeque<>());
+            spawnQueueAmbients.put(world, new ConcurrentLinkedDeque<>());
+            spawnQueueWatermobs.put(world, new ConcurrentLinkedDeque<>());
         }
     }
 
@@ -87,22 +101,54 @@ public class MobListener implements Listener {
         World world = event.getLocation().getWorld();
 
         if(Util.isNaturallySpawningAnimal(event.getEntity())) {
-             processEntity(event, controller.getMobCapAnimals(world), proximityAnimals);
+             spawnQueueAnimals.get(world).add(event.getEntity());
         }
         else if(Util.isNaturallySpawningMonster(event.getEntity())) {
-            processEntity(event, controller.getMobCapMonsters(world), proximityMonsters);
+            spawnQueueMonsters.get(world).add(event.getEntity());
         }
         else if(Util.isNaturallySpawningAmbient(event.getEntity())) {
-            processEntity(event, controller.getMobCapAmbient(world), proximityAmbients);
+            spawnQueueAmbients.get(world).add(event.getEntity());
         }
         else if(Util.isNaturallySpawningWatermob(event.getEntity())) {
-            processEntity(event, controller.getMobCapWatermobs(world), proximityWatermobs);
+            spawnQueueWatermobs.get(world).add(event.getEntity());
         }
     }
 
-    private void processEntity(CreatureSpawnEvent event, int mobCap, Map<Player, Integer>proximityMap){
+    void processQueues(){
+        if(controller.isDisabled()){ return; }
+
+        Queue<Entity> queue;
+        int mobCap;
+        for(World world : controller.getServer().getWorlds()){
+            queue = spawnQueueAnimals.get(world);
+            mobCap = controller.getMobCapAnimals(world);
+            while(!queue.isEmpty()){
+                processEntity(queue.remove(), mobCap, proximityAnimals);
+            }
+
+            queue = spawnQueueMonsters.get(world);
+            mobCap = controller.getMobCapMonsters(world);
+            while(!queue.isEmpty()){
+                processEntity(queue.remove(), mobCap, proximityMonsters);
+            }
+
+            queue = spawnQueueAmbients.get(world);
+            mobCap = controller.getMobCapAmbient(world);
+            while(!queue.isEmpty()){
+                processEntity(queue.remove(), mobCap, proximityAmbients);
+            }
+
+            queue = spawnQueueWatermobs.get(world);
+            mobCap = controller.getMobCapWatermobs(world);
+            while(!queue.isEmpty()){
+                processEntity(queue.remove(), mobCap, proximityWatermobs);
+            }
+        }
+    }
+
+    private void processEntity(Entity entity, int mobCap, Map<Player, Integer>proximityMap){
         boolean anyFull = false;
-        Collection<Player> players = Util.getPlayersInSquareRange(event.getLocation(), controller.getSpawnRange());
+        Collection<Player> players = Util.getPlayersInSquareRange(entity.getLocation(), controller.getSpawnRange());
         for(Player player: players){
             if(proximityMap.get(player) > mobCap){
                 anyFull = true;
@@ -110,7 +156,7 @@ public class MobListener implements Listener {
         }
 
         if(anyFull){
-            event.setCancelled(true);
+            entity.remove();
         }else{
             for(Player player: players){
                 proximityMap.put(player, proximityMap.get(player)+1);
