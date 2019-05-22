@@ -25,7 +25,7 @@ public class Util {
     }
 
     static Collection<Player> getPlayersInSquareRange(Location location, int rangeChunks){
-        int range = rangeChunks * 16;
+        int range = rangeChunks * 17;
 
         Collection<Player> playerCollection = getNearbyPlayers(location,rangeChunks*23);
 
@@ -95,10 +95,11 @@ public class Util {
     }
 
     private static boolean wasNaturallySpawned(Entity entity){
-        try{
-            Class.forName("com.destroystokyo.paper.event.entity.PlayerNaturallySpawnCreaturesEvent");
+        DistributedMobSpawns controller = DistributedMobSpawns.getController();
+        if(controller.countOnlyNaturalSpawned(entity.getWorld())) {
             return entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
-        }catch (ClassNotFoundException e) {
+        }
+        else {
             return true;
         }
     }

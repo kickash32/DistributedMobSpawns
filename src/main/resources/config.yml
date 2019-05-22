@@ -1,6 +1,6 @@
-# mob-spawn-range should be exactly the same as in spigot.yml
-# MAKE SURE YOU ADJUST THIS
-mob-spawn-range: 6
 # adjust-spawn-limits-for-range should be set to true if the number of monsters per player should be independent of range
 # (in spigot and paper by default it is lower if mob-spawn-range is not 8)
 adjust-spawn-limits-for-range: false
+#countUpdatePeriod is the period(ticks) in which mob counts are updated
+#increase to compensate for lag, decrease to increase mob spawning responsiveness
+countUpdatePeriod: 20

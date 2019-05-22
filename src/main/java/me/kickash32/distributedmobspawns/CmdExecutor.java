@@ -14,8 +14,8 @@ import java.util.List;
 public class CmdExecutor implements CommandExecutor {
     private DistributedMobSpawns controller;
 
-    CmdExecutor(DistributedMobSpawns c){
-        controller = c;
+    CmdExecutor(DistributedMobSpawns controller){
+        this.controller = controller;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class CmdExecutor implements CommandExecutor {
     }
 
     private void onToggleCommand(CommandSender sender) {
-        sender.sendMessage("[DMS] Enforcement is now: " + !controller.toggleDisabled());
+        sender.sendMessage("[DMS] Enforcement is now: " + !this.controller.toggleDisabled());
     }
 
 
@@ -123,8 +123,7 @@ public class CmdExecutor implements CommandExecutor {
     }
     private void onDebugCommand(CommandSender sender){// TO DO move to separate class
         ArrayList<String> msgs = new ArrayList<>();
-        Server server = controller.getServer();
-        int radius = controller.getSpawnRange()*16;
+        Server server = this.controller.getServer();
 
         long playerAnimalCount;
         long playerAnimalLimit;
@@ -146,6 +145,7 @@ public class CmdExecutor implements CommandExecutor {
         long worldWatermobLimit;
         long worldWatermobCount;
 
+        int radius;
 
         msgs.add("[Distributed Mob Spawns]");
         msgs.add("Format: [world] player: #Animal/Animal_Limit* #Monster/Monster_Limit* #Ambient/Ambient_Limit* #Watermob/Watermob_Limit*");
@@ -156,6 +156,7 @@ public class CmdExecutor implements CommandExecutor {
         String prefixColor = "";
 
         for(World world : server.getWorlds()){
+            radius = this.controller.getSpawnRange(world)*16;
             prefix = String.format("%s[%s]", prefixColor, world.getName());
 
             worldAnimalLimit = 0;
@@ -179,14 +180,14 @@ public class CmdExecutor implements CommandExecutor {
                         .filter(entity -> Util.isNaturallySpawningWatermob(entity))
                         .count();
 
-                playerAnimalLimit = controller.getMobCapAnimals(world);
-                worldAnimalLimit += playerAnimalLimit;//overestimation
-                playerMonsterLimit = controller.getMobCapMonsters(world);
-                worldMonsterLimit += playerMonsterLimit;//overestimation
-                playerAmbientLimit = controller.getMobCapAmbient(world);
-                worldAmbientLimit += playerAmbientLimit;//overestimation
-                playerWatermobLimit = controller.getMobCapWatermobs(world);
-                worldWatermobLimit += playerWatermobLimit;//overestimation
+                playerAnimalLimit = this.controller.getMobCapAnimals(world);
+                worldAnimalLimit += playerAnimalLimit;
+                playerMonsterLimit = this.controller.getMobCapMonsters(world);
+                worldMonsterLimit += playerMonsterLimit;
+                playerAmbientLimit = this.controller.getMobCapAmbient(world);
+                worldAmbientLimit += playerAmbientLimit;
+                playerWatermobLimit = this.controller.getMobCapWatermobs(world);
+                worldWatermobLimit += playerWatermobLimit;
 
                 msgs.add(String.format("%s %s%s %d/%d %d/%d %d/%d %d/%d", prefix, player.getDisplayName(), separator,
                         playerAnimalCount, playerAnimalLimit,
