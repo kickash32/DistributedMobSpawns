@@ -43,8 +43,9 @@ public class EntityProcessor {
 //        }
     }
 
-    void update(Player player, int radius){
+    void update(Player player){
         World world = player.getWorld();
+        int radius = controller.getSpawnRange(world);
         Location location = player.getLocation();
         //get player's chunk co-ordinates
         int ii = (int)Math.floor(0.0+location.getBlockX() / 16.0D);

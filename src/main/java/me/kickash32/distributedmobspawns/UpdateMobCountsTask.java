@@ -28,7 +28,7 @@ public class UpdateMobCountsTask implements Runnable {
 //                        new Thread(() -> {
 //                            try {
 //                                System.out.println("wtf");
-                                entityProcessor.update(player, controller.getSpawnRange(player.getWorld()));
+                                entityProcessor.update(player);
 //                                System.out.println("wtf2");
 //                            }
 //                            catch (Exception ignored){
