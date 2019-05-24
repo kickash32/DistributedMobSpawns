@@ -1,5 +1,6 @@
 package me.kickash32.distributedmobspawns;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -17,6 +18,7 @@ public class Util {
 
         List<Player> list = new ArrayList<>();
         for(Player player: loc.getWorld().getPlayers()) {
+            if(player.getGameMode().equals(GameMode.SPECTATOR)){ continue; }
             if (player.getLocation().distanceSquared(loc) < distanceSquared) {
                 list.add(player);
             }
