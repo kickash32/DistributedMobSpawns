@@ -56,6 +56,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.processor = new EntityProcessor(this);
         this.listener = new EntityEventListener(this, processor);
         this.cmdEx = new CmdExecutor(this);
+        this.getServer().getPluginManager().registerEvents(this.listener, this);
 
         this.disabled = false;
 

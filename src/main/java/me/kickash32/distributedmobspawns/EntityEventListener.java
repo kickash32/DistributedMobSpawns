@@ -12,7 +12,6 @@ public class EntityEventListener implements Listener {
     EntityEventListener(DistributedMobSpawns controller, EntityProcessor entityProcessor){
         this.controller = controller;
         this.entityProcessor = entityProcessor;
-        controller.getServer().getPluginManager().registerEvents(this, controller);
     }
 
     @EventHandler
