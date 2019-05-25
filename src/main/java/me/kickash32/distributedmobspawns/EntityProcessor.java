@@ -16,11 +16,6 @@ public class EntityProcessor {
     private Map<Player, Integer> proximityAmbients;
     private Map<Player, Integer> proximityWatermobs;
 
-//    private Map<World, Set<Entity>> spawnQueueAnimals;
-//    private Map<World, Set<Entity>> spawnQueueMonsters;
-//    private Map<World, Set<Entity>> spawnQueueAmbients;
-//    private Map<World, Set<Entity>> spawnQueueWatermobs;
-
     DistributedMobSpawns controller;
 
     public EntityProcessor(DistributedMobSpawns controller){
@@ -29,18 +24,6 @@ public class EntityProcessor {
         this.proximityMonsters = new ConcurrentHashMap<>();
         this.proximityAmbients = new ConcurrentHashMap<>();
         this.proximityWatermobs = new ConcurrentHashMap<>();
-
-//        this.spawnQueueAnimals = new HashMap<>();
-//        this.spawnQueueMonsters = new HashMap<>();
-//        this.spawnQueueAmbients = new HashMap<>();
-//        this.spawnQueueWatermobs = new HashMap<>();
-//
-//        for(World world : controller.getServer().getWorlds()){
-//            this.spawnQueueAnimals.put(world, new HashSet<>());
-//            this.spawnQueueMonsters.put(world, new HashSet<>());
-//            this.spawnQueueAmbients.put(world, new HashSet<>());
-//            this.spawnQueueWatermobs.put(world, new HashSet<>());
-//        }
     }
 
     void update(Player player){
@@ -75,18 +58,17 @@ public class EntityProcessor {
                 for (index = 0; index < chunkEntities.length; index++) {
                     entity = chunkEntities[index];
 
-                for (Entity entity : chunk.getEntities()) {
-                    if (Util.isNaturallySpawningAnimal(entity) ){//&& !this.spawnQueueAnimals.get(world).contains(entity)) {
+                    if (Util.isNaturallySpawningAnimal(entity) ){
                         animalCount++;
                     }
-                    else if (Util.isNaturallySpawningMonster(entity) ){//&& !this.spawnQueueMonsters.get(world).contains(entity)) {
+                    else if (Util.isNaturallySpawningMonster(entity) ){
                         monsterCount++;
                     }
-                    else if (Util.isNaturallySpawningAmbient(entity) ){//&& !this.spawnQueueAmbients.get(world).contains(entity)) {
+                    else if (Util.isNaturallySpawningAmbient(entity) ){
                         ambientCount++;
                     }
-                    else if (Util.isNaturallySpawningWatermob(entity) ){//&& !this.spawnQueueWatermobs.get(world).contains(entity)) {
-                        watermobCount++;
+                    else if (Util.isNaturallySpawningWatermob(entity) ){
+                            watermobCount++;
                     }
                 }
             }
@@ -102,61 +84,17 @@ public class EntityProcessor {
 
         if(Util.isNaturallySpawningAnimal(entity)) {
             processEntity(entity, controller.getMobCapAnimals(world), proximityAnimals);
-//            this.spawnQueueAnimals.get(world).add(entity);
         }
         else if(Util.isNaturallySpawningMonster(entity)) {
             processEntity(entity, controller.getMobCapMonsters(world), proximityMonsters);
-//            this.spawnQueueMonsters.get(world).add(entity);
         }
         else if(Util.isNaturallySpawningAmbient(entity)) {
             processEntity(entity, controller.getMobCapAmbient(world), proximityAmbients);
-//            this.spawnQueueAmbients.get(world).add(entity);
         }
         else if(Util.isNaturallySpawningWatermob(entity)) {
             processEntity(entity, controller.getMobCapWatermobs(world), proximityWatermobs);
-//            this.spawnQueueWatermobs.get(world).add(entity);
         }
     }
-
-//    void processQueues(){
-//        Set<Entity> queue;
-//        int mobCap;
-//        Map<Player, Integer>proximityMap;
-//        for(World world : controller.getServer().getWorlds()){
-//
-//            queue = this.spawnQueueAnimals.get(world);
-//            mobCap = this.controller.getMobCapAnimals(world);
-//            proximityMap = this.proximityAnimals;
-//            for(Entity entity : queue){
-//                processEntity(entity, mobCap, proximityMap);
-//            }
-//            queue.clear();
-//
-//            queue = this.spawnQueueMonsters.get(world);
-//            mobCap = this.controller.getMobCapMonsters(world);
-//            proximityMap = this.proximityMonsters;
-//            for(Entity entity : queue){
-//                processEntity(entity, mobCap, proximityMap);
-//            }
-//            queue.clear();
-//
-//            queue = this.spawnQueueAmbients.get(world);
-//            mobCap = this.controller.getMobCapAmbient(world);
-//            proximityMap = this.proximityAmbients;
-//            for(Entity entity : queue){
-//                processEntity(entity, mobCap, proximityMap);
-//            }
-//            queue.clear();
-//
-//            queue = this.spawnQueueWatermobs.get(world);
-//            mobCap = this.controller.getMobCapWatermobs(world);
-//            proximityMap = this.proximityWatermobs;
-//            for(Entity entity : queue){
-//                processEntity(entity, mobCap, proximityMap);
-//            }
-//            queue.clear();
-//        }
-//    }
 
     boolean processEntity(Entity entity, int mobCap, Map<Player, Integer>proximityMap){
         boolean anyFull = false;
