@@ -58,13 +58,22 @@ public class EntityProcessor {
 
         //get Chunk info
         Chunk chunk;
+        int index;
+        Entity[] chunkEntities;
+        Entity entity;
+
+        int chunkX;
+        int chunkZ;
         for(int i = -radius; i <= radius; i++){
             for(int k = -radius; k <= radius; k++) {
-                int chunkX = i + ii;
-                int chunkZ = k + kk;
+                chunkX = i + ii;
+                chunkZ = k + kk;
                 if (!world.isChunkLoaded(chunkX, chunkZ)) { continue; }
 
                 chunk = world.getChunkAt(chunkX, chunkZ);
+                chunkEntities = chunk.getEntities();
+                for (index = 0; index < chunkEntities.length; index++) {
+                    entity = chunkEntities[index];
 
                 for (Entity entity : chunk.getEntities()) {
                     if (Util.isNaturallySpawningAnimal(entity) ){//&& !this.spawnQueueAnimals.get(world).contains(entity)) {
