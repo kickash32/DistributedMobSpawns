@@ -5,13 +5,15 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CmdExecutor implements CommandExecutor {
+public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
     private DistributedMobSpawns controller;
 
     CmdExecutor(DistributedMobSpawns controller){
@@ -32,9 +34,6 @@ public class CmdExecutor implements CommandExecutor {
                 break;
             case "help":
                 onHelpCommand(sender);
-                break;
-            case "reload":
-                onReloadCommand(sender);
                 break;
             case "toggle":
                 onToggleCommand(sender);
@@ -102,11 +101,6 @@ public class CmdExecutor implements CommandExecutor {
         }
     }
 
-    private void onReloadCommand(CommandSender sender) {
-        controller.reloadConfig();
-        sender.sendMessage("[DMS] reload complete");
-    }
-
     private void onToggleCommand(CommandSender sender) {
         sender.sendMessage("[DMS] Enforcement is now: " + !this.controller.toggleDisabled());
     }
@@ -117,11 +111,10 @@ public class CmdExecutor implements CommandExecutor {
         sender.sendMessage("butcher {mobtype}: kill all mobs of {mobtype} from the current world");
         sender.sendMessage("stats: view distribution of monsters");
         sender.sendMessage("help: view command info");
-        sender.sendMessage("reload: reload configuration from file");
         sender.sendMessage("toggle: toggle distribution enforcement");
-        sender.sendMessage("Supported [animals] [monsters] [ambients] [watermobs] [all]");
+        //sender.sendMessage("Supported [animals] [monsters] [ambients] [watermobs] [all]");
     }
-    private void onDebugCommand(CommandSender sender){// TO DO move to separate class
+    private void onDebugCommand(CommandSender sender){// TODO move to separate class
         ArrayList<String> msgs = new ArrayList<>();
         Server server = this.controller.getServer();
 
@@ -218,5 +211,31 @@ public class CmdExecutor implements CommandExecutor {
         }
 
         sender.sendMessage(msgs.toArray(new String[0]));
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> options = new ArrayList<>();
+        //TODO rework to be modular
+        if(args.length == 0){
+        }
+        else if(args.length == 1){
+            options.add("butcher");
+            options.add("stats");
+            options.add("help");
+            options.add("toggle");
+        }
+        else if(args.length == 2){
+            options.add("animals");
+            options.add("monsters");
+            options.add("ambient");
+            options.add("watermobs");
+            options.add("all");
+        }
+
+        options.removeIf(string ->
+                !string.contains(
+                    args[args.length-1].toLowerCase()));
+        return options;
     }
 }
