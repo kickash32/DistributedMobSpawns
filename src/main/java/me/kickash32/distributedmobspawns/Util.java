@@ -2,23 +2,89 @@ package me.kickash32.distributedmobspawns;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Ambient;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Ghast;
+import org.bukkit.entity.Monster;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.WaterMob;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
 
 public class Util {
+    private static Set<EntityType> animalTypes = generateAnimalTypes();
+    private static Set<EntityType> monsterTypes = generateMonsterTypes();
+    private static Set<EntityType> ambientTypes = generateAmbientTypes();
+    private static Set<EntityType> watermobTypes = generateWatermobTypes();
 
-    static List<Player> getNearbyPlayers(Location loc, int distance)
-    {
-        int distanceSquared = distance*distance;
+    private static Set<EntityType> generateAnimalTypes() {
+        Set<EntityType> result = new HashSet<>();
+        for (EntityType type : EntityType.values()) {
+            Class c = type.getEntityClass();
+            if (c != null &&
+                    Animals.class.isAssignableFrom(c)) {
+                result.add(type);
+            }
+        }
+        return result;
+    }
+
+    private static Set<EntityType> generateMonsterTypes() {
+        Set<EntityType> result = new HashSet<>();
+        for (EntityType type : EntityType.values()) {
+            Class c = type.getEntityClass();
+            if (c != null && (
+                    Monster.class.isAssignableFrom(c) ||
+                            Slime.class.isAssignableFrom(c) ||
+                            Ghast.class.isAssignableFrom(c))) {
+                result.add(type);
+            }
+        }
+        return result;
+    }
+
+    private static Set<EntityType> generateAmbientTypes() {
+        Set<EntityType> result = new HashSet<>();
+        for (EntityType type : EntityType.values()) {
+            Class c = type.getEntityClass();
+            if (c != null &&
+                    Ambient.class.isAssignableFrom(c)) {
+                result.add(type);
+            }
+        }
+        return result;
+    }
+
+    private static Set<EntityType> generateWatermobTypes() {
+        Set<EntityType> result = new HashSet<>();
+        for (EntityType type : EntityType.values()) {
+            Class c = type.getEntityClass();
+            if (c != null &&
+                    WaterMob.class.isAssignableFrom(c)) {
+                result.add(type);
+            }
+        }
+        return result;
+    }
+
+    static List<Player> getNearbyPlayers(Location loc, int distance) {
+        int distanceSquared = distance * distance;
 
         List<Player> list = new ArrayList<>();
-        for(Player player: loc.getWorld().getPlayers()) {
-            if(player.getGameMode().equals(GameMode.SPECTATOR)){ continue; }
+        for (Player player : loc.getWorld().getPlayers()) {
+            if (player.getGameMode().equals(GameMode.SPECTATOR)) {
+                continue;
+            }
             if (player.getLocation().distanceSquared(loc) < distanceSquared) {
                 list.add(player);
             }
@@ -26,82 +92,80 @@ public class Util {
         return list;
     }
 
-    static Collection<Player> getPlayersInSquareRange(Location location, int rangeChunks){
+    static Collection<Player> getPlayersInSquareRange(Location location, int rangeChunks) {
         int range = rangeChunks * 17;
 
-        Collection<Player> playerCollection = getNearbyPlayers(location,rangeChunks*23);
+        Collection<Player> playerCollection = getNearbyPlayers(location, rangeChunks * 23);
 
         Iterator<Player> iterator = playerCollection.iterator();
         Player player;
         Location playerLocation;
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             player = iterator.next();
             playerLocation = player.getLocation();
 
-            if(Math.abs(playerLocation.getBlockX() - location.getBlockX()) < range &&
-                    Math.abs(playerLocation.getBlockZ() - location.getBlockZ()) < range){
-            }
-            else{
+            if (Math.abs(playerLocation.getBlockX() - location.getBlockX()) < range &&
+                    Math.abs(playerLocation.getBlockZ() - location.getBlockZ()) < range) {
+            } else {
                 iterator.remove();
             }
         }
         return playerCollection;
     }
 
-    static int chunksInRadius(int radius){
-        return ((radius*2)+1)*((radius*2)+1);
+    static int chunksInRadius(int radius) {
+        return ((radius * 2) + 1) * ((radius * 2) + 1);
     }
 
-    static boolean isNaturallySpawningAnimal(Entity entity){
-        if (entity == null) { return false; }
-        return isAnimal(entity.getType()) && wasNaturallySpawned(entity);
-    }
-    static boolean isAnimal(EntityType type){
-        if (type == EntityType.UNKNOWN || type == null) { return false; }
-        Class c = type.getEntityClass();
-        return Animals.class.isAssignableFrom(c);
-    }
-
-    static boolean isNaturallySpawningMonster(Entity entity){
-        if (entity == null) { return false; }
-        return isMonster(entity.getType()) && wasNaturallySpawned(entity);
-    }
-    static boolean isMonster(EntityType type){
-        if (type == EntityType.UNKNOWN || type == null) { return false; }
-        Class c = type.getEntityClass();
-        boolean result = (Monster.class.isAssignableFrom(c)||
-                Slime.class.isAssignableFrom(c)||
-                Ghast.class.isAssignableFrom(c));
-        return result &&
-                !Phantom.class.isAssignableFrom(c); //phantoms do not count towards monsters mobcap
-    }
-
-    static boolean isNaturallySpawningAmbient(Entity entity){
-        if (entity == null) { return false; }
-        return isAmbient(entity.getType()) && wasNaturallySpawned(entity);
-    }
-    static boolean isAmbient(EntityType type){
-        if (type == EntityType.UNKNOWN || type == null) { return false; }
-        Class c = type.getEntityClass();
-        return Ambient.class.isAssignableFrom(c);
-    }
-
-    static boolean isNaturallySpawningWatermob(Entity entity){
-        if (entity == null) { return false; }
-        return isWatermob(entity.getType()) && wasNaturallySpawned(entity);
-    }
-    static boolean isWatermob(EntityType type){
-        if (type == EntityType.UNKNOWN || type == null) { return false; }
-        Class c = type.getEntityClass();
-        return WaterMob.class.isAssignableFrom(c);
-    }
-
-    private static boolean wasNaturallySpawned(Entity entity){
-        DistributedMobSpawns controller = DistributedMobSpawns.getController();
-        if(controller.countOnlyNaturalSpawned(entity.getWorld())) {
-            return entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+    static boolean isNaturallySpawningAnimal(Entity entity) {
+        if (entity == null) {
+            return false;
         }
-        else {
+        return animalTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+    }
+
+    static boolean isNaturallySpawningMonster(Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        return monsterTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+    }
+
+    static boolean isNaturallySpawningAmbient(Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        return ambientTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+    }
+
+    static boolean isNaturallySpawningWatermob(Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        return watermobTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+    }
+
+    static boolean isNaturallySpawningAnimal(EntityType type) {
+        return animalTypes.contains(type);
+    }
+
+    static boolean isNaturallySpawningMonster(EntityType type) {
+        return monsterTypes.contains(type);
+    }
+
+    static boolean isNaturallySpawningAmbient(EntityType type) {
+        return ambientTypes.contains(type);
+    }
+
+    static boolean isNaturallySpawningWatermob(EntityType type) {
+        return watermobTypes.contains(type);
+    }
+
+    private static boolean wasNaturallySpawned(Entity entity) {
+        DistributedMobSpawns controller = DistributedMobSpawns.getController();
+        if (controller.getCountOnlyNaturalSpawned(entity.getWorld())) {
+            return entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+        } else {
             return true;
         }
     }
