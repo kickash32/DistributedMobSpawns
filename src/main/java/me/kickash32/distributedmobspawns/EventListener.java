@@ -5,23 +5,21 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 
-public class EntityEventListener implements Listener {
+public class EventListener implements Listener {
     private DistributedMobSpawns controller;
     private EntityProcessor entityProcessor;
 
-    EntityEventListener(DistributedMobSpawns controller, EntityProcessor entityProcessor){
+    EventListener(DistributedMobSpawns controller, EntityProcessor entityProcessor) {
         this.controller = controller;
         this.entityProcessor = entityProcessor;
     }
 
+    //ENTITY EVENTS
     @EventHandler
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
-        if (this.controller.isDisabled()) {
-            return;
-        }
         if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL) {
             return;
         }
-        this.entityProcessor.enqueue(event.getEntity());
+        this.entityProcessor.trySpawn(event, event.getLocation(), event.getEntityType());
     }
 }
