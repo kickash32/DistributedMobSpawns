@@ -4,42 +4,43 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EntityProcessor {
 
+    DistributedMobSpawns controller;
     private Map<Player, Integer> proximityAnimals;
     private Map<Player, Integer> proximityMonsters;
     private Map<Player, Integer> proximityAmbients;
     private Map<Player, Integer> proximityWatermobs;
 
-    DistributedMobSpawns controller;
-
-    public EntityProcessor(DistributedMobSpawns controller){
+    public EntityProcessor(DistributedMobSpawns controller) {
         this.controller = controller;
-        this.proximityAnimals = new ConcurrentHashMap<>();
-        this.proximityMonsters = new ConcurrentHashMap<>();
-        this.proximityAmbients = new ConcurrentHashMap<>();
-        this.proximityWatermobs = new ConcurrentHashMap<>();
+        this.proximityAnimals = new HashMap<>();
+        this.proximityMonsters = new HashMap<>();
+        this.proximityAmbients = new HashMap<>();
+        this.proximityWatermobs = new HashMap<>();
     }
 
-    void update(Player player){
+    void update(Player player) {
         World world = player.getWorld();
         int radius = controller.getSpawnRange(world);
         Location location = player.getLocation();
         //get player's chunk co-ordinates
-        int ii = (int)Math.floor(0.0+location.getBlockX() / 16.0D);
-        int kk = (int)Math.floor(0.0+location.getBlockZ() / 16.0D);
+        int ii = (int) Math.floor(0.0 + location.getBlockX() / 16.0D);
+        int kk = (int) Math.floor(0.0 + location.getBlockZ() / 16.0D);
 
         int animalCount = 0;
         int monsterCount = 0;
         int ambientCount = 0;
         int watermobCount = 0;
 
-        //get Chunk info
         Chunk chunk;
         int index;
         Entity[] chunkEntities;
@@ -47,8 +48,8 @@ public class EntityProcessor {
 
         int chunkX;
         int chunkZ;
-        for(int i = -radius; i <= radius; i++){
-            for(int k = -radius; k <= radius; k++) {
+        for (int i = -radius; i <= radius; i++) {
+            for (int k = -radius; k <= radius; k++) {
                 chunkX = i + ii;
                 chunkZ = k + kk;
                 if (!world.isChunkLoaded(chunkX, chunkZ)) { continue; }
@@ -58,18 +59,10 @@ public class EntityProcessor {
                 for (index = 0; index < chunkEntities.length; index++) {
                     entity = chunkEntities[index];
 
-                    if (Util.isNaturallySpawningAnimal(entity) ){
-                        animalCount++;
-                    }
-                    else if (Util.isNaturallySpawningMonster(entity) ){
-                        monsterCount++;
-                    }
-                    else if (Util.isNaturallySpawningAmbient(entity) ){
-                        ambientCount++;
-                    }
-                    else if (Util.isNaturallySpawningWatermob(entity) ){
-                            watermobCount++;
-                    }
+                    if (Util.isNaturallySpawningAnimal(entity)) { animalCount++; }
+                    else if (Util.isNaturallySpawningMonster(entity)) { monsterCount++; }
+                    else if (Util.isNaturallySpawningAmbient(entity)) { ambientCount++; }
+                    else if (Util.isNaturallySpawningWatermob(entity)) { watermobCount++; }
                 }
             }
         }
@@ -79,39 +72,46 @@ public class EntityProcessor {
         this.proximityWatermobs.put(player, watermobCount);
     }
 
-    void enqueue(Entity entity){
-        World world = entity.getLocation().getWorld();
+    boolean allFull(Player player) {
+        World world = player.getWorld();
+        return
+                this.proximityAnimals.getOrDefault(player, 0) >= controller.getMobCapAnimals(world) &&
+                        this.proximityMonsters.getOrDefault(player, 0) >= controller.getMobCapMonsters(world) &&
+                        this.proximityAmbients.getOrDefault(player, 0) >= controller.getMobCapAmbient(world) &&
+                        this.proximityWatermobs.getOrDefault(player, 0) >= controller.getMobCapWatermobs(world);
+    }
 
-        if(Util.isNaturallySpawningAnimal(entity)) {
-            processEntity(entity, controller.getMobCapAnimals(world), proximityAnimals);
-        }
-        else if(Util.isNaturallySpawningMonster(entity)) {
-            processEntity(entity, controller.getMobCapMonsters(world), proximityMonsters);
-        }
-        else if(Util.isNaturallySpawningAmbient(entity)) {
-            processEntity(entity, controller.getMobCapAmbient(world), proximityAmbients);
-        }
-        else if(Util.isNaturallySpawningWatermob(entity)) {
-            processEntity(entity, controller.getMobCapWatermobs(world), proximityWatermobs);
+    void trySpawn(Cancellable event, Location location, EntityType type) {
+        World world = location.getWorld();
+
+        if (Util.isNaturallySpawningAnimal(type)) {
+            event.setCancelled(
+                    !processSpawn(location, controller.getMobCapAnimals(world), proximityAnimals));
+        } else if (Util.isNaturallySpawningMonster(type)) {
+            event.setCancelled(
+                    !processSpawn(location, controller.getMobCapMonsters(world), proximityMonsters));
+        } else if (Util.isNaturallySpawningAmbient(type)) {
+            event.setCancelled(
+                    !processSpawn(location, controller.getMobCapAmbient(world), proximityAmbients));
+        } else if (Util.isNaturallySpawningWatermob(type)) {
+            event.setCancelled(
+                    !processSpawn(location, controller.getMobCapWatermobs(world), proximityWatermobs));
         }
     }
 
-    boolean processEntity(Entity entity, int mobCap, Map<Player, Integer>proximityMap){
+    boolean processSpawn(Location location, int mobCap, Map<Player, Integer> proximityMap) {
         boolean anyFull = false;
-        Collection<Player> nearbyPlayers = Util.getPlayersInSquareRange(entity.getLocation(), controller.getSpawnRange(entity.getWorld()));
+        Collection<Player> nearbyPlayers = Util.getPlayersInSquareRange(location, controller.getSpawnRange(location.getWorld()));
         for (Player player : nearbyPlayers) {
-            if (proximityMap.getOrDefault(player, mobCap) > mobCap) {
-                anyFull = true;
-            }
+            if (proximityMap.getOrDefault(player, mobCap) >= mobCap) { anyFull = true; }
         }
 
-        if(anyFull){
-            entity.remove();
-        }else{
-            for(Player player: nearbyPlayers){
-                proximityMap.put(player, proximityMap.getOrDefault(player, mobCap)+1);
+        if (anyFull) { return false; }
+        else {
+            for (Player player : nearbyPlayers) {
+                proximityMap.put(player, proximityMap.getOrDefault(player, mobCap) + 1);
             }
+            return true;
         }
-        return !anyFull;
     }
 }
