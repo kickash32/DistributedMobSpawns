@@ -6,7 +6,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,25 +80,27 @@ public class EntityProcessor {
                         this.proximityWatermobs.getOrDefault(player, 0) >= controller.getMobCapWatermobs(world);
     }
 
-    void trySpawn(Cancellable event, Location location, EntityType type) {
+    boolean isSpawnAllowed(Location location, EntityType type) {
+        //new Exception().printStackTrace();
         World world = location.getWorld();
 
-        if (Util.isNaturallySpawningAnimal(type)) {
-            event.setCancelled(
-                    !processSpawn(location, controller.getMobCapAnimals(world), proximityAnimals));
-        } else if (Util.isNaturallySpawningMonster(type)) {
-            event.setCancelled(
-                    !processSpawn(location, controller.getMobCapMonsters(world), proximityMonsters));
-        } else if (Util.isNaturallySpawningAmbient(type)) {
-            event.setCancelled(
-                    !processSpawn(location, controller.getMobCapAmbient(world), proximityAmbients));
-        } else if (Util.isNaturallySpawningWatermob(type)) {
-            event.setCancelled(
-                    !processSpawn(location, controller.getMobCapWatermobs(world), proximityWatermobs));
-        }
-    }
+        int mobCap = -1;
+        Map<Player, Integer> proximityMap = null;
 
-    boolean processSpawn(Location location, int mobCap, Map<Player, Integer> proximityMap) {
+        if (Util.isNaturallySpawningAnimal(type)) {
+            mobCap = controller.getMobCapAnimals(world);
+            proximityMap = proximityAnimals;
+        } else if (Util.isNaturallySpawningMonster(type)) {
+            mobCap = controller.getMobCapMonsters(world);
+            proximityMap = proximityMonsters;
+        } else if (Util.isNaturallySpawningAmbient(type)) {
+            mobCap = controller.getMobCapAmbient(world);
+            proximityMap = proximityAmbients;
+        } else if (Util.isNaturallySpawningWatermob(type)) {
+            mobCap = controller.getMobCapAmbient(world);
+            proximityMap = proximityWatermobs;
+        }
+
         boolean anyFull = false;
         Collection<Player> nearbyPlayers = Util.getPlayersInSquareRange(location, controller.getSpawnRange(location.getWorld()));
         for (Player player : nearbyPlayers) {

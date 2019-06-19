@@ -57,7 +57,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.loadConfig();
 
         this.processor = new EntityProcessor(this);
-        if (PaperLib.isPaper()) { this.listener = new EventListenerPaper(this, processor); }
+        if (false&&PaperLib.isPaper()) { this.listener = new EventListenerPaper(this, processor); }
         else { this.listener = new EventListener(this, processor); }
 
         this.getServer().getPluginManager().registerEvents(this.listener, this);

@@ -28,6 +28,7 @@ public class EventListenerPaper implements Listener {
         if (event.getReason() != CreatureSpawnEvent.SpawnReason.NATURAL) {
             return;
         }
-        this.entityProcessor.trySpawn(event, event.getSpawnLocation(), event.getType());
+        boolean success = this.entityProcessor.isSpawnAllowed(event.getSpawnLocation(), event.getType());
+        event.setShouldAbortSpawn(!success);
     }
 }

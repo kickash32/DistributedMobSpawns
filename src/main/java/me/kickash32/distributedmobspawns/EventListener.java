@@ -20,6 +20,7 @@ public class EventListener implements Listener {
         if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL) {
             return;
         }
-        this.entityProcessor.trySpawn(event, event.getLocation(), event.getEntityType());
+        boolean success = this.entityProcessor.isSpawnAllowed(event.getLocation(), event.getEntityType());
+        event.setCancelled(!success);
     }
 }

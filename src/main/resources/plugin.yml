@@ -1,5 +1,5 @@
 name: DistributedMobSpawns
-version: 2.1.0
+version: 2.1.1
 main: me.kickash32.distributedmobspawns.DistributedMobSpawns
 api-version: 1.13
 prefix: DMS
