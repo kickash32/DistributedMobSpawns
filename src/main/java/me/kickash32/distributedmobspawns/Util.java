@@ -77,7 +77,7 @@ public class Util {
         return result;
     }
 
-    static List<Player> getNearbyPlayers(Location loc, int distance) {
+    public static List<Player> getNearbyPlayers(Location loc, int distance) {
         int distanceSquared = distance * distance;
 
         List<Player> list = new ArrayList<>();
@@ -92,7 +92,7 @@ public class Util {
         return list;
     }
 
-    static Collection<Player> getPlayersInSquareRange(Location location, int rangeChunks) {
+    public static Collection<Player> getPlayersInSquareRange(Location location, int rangeChunks) {
         int range = rangeChunks * 17;
 
         Collection<Player> playerCollection = getNearbyPlayers(location, rangeChunks * 23);
@@ -113,55 +113,55 @@ public class Util {
         return playerCollection;
     }
 
-    static int chunksInRadius(int radius) {
+    public static int chunksInRadius(int radius) {
         return ((radius * 2) + 1) * ((radius * 2) + 1);
     }
 
-    static boolean isNaturallySpawningAnimal(Entity entity) {
+    public static boolean isNaturallySpawningAnimal(Entity entity) {
         if (entity == null) {
             return false;
         }
         return animalTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
     }
 
-    static boolean isNaturallySpawningMonster(Entity entity) {
+    public static boolean isNaturallySpawningMonster(Entity entity) {
         if (entity == null) {
             return false;
         }
         return monsterTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
     }
 
-    static boolean isNaturallySpawningAmbient(Entity entity) {
+    public static boolean isNaturallySpawningAmbient(Entity entity) {
         if (entity == null) {
             return false;
         }
         return ambientTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
     }
 
-    static boolean isNaturallySpawningWatermob(Entity entity) {
+    public static boolean isNaturallySpawningWatermob(Entity entity) {
         if (entity == null) {
             return false;
         }
         return watermobTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
     }
 
-    static boolean isNaturallySpawningAnimal(EntityType type) {
+    public static boolean isNaturallySpawningAnimal(EntityType type) {
         return animalTypes.contains(type);
     }
 
-    static boolean isNaturallySpawningMonster(EntityType type) {
+    public static boolean isNaturallySpawningMonster(EntityType type) {
         return monsterTypes.contains(type);
     }
 
-    static boolean isNaturallySpawningAmbient(EntityType type) {
+    public static boolean isNaturallySpawningAmbient(EntityType type) {
         return ambientTypes.contains(type);
     }
 
-    static boolean isNaturallySpawningWatermob(EntityType type) {
+    public static boolean isNaturallySpawningWatermob(EntityType type) {
         return watermobTypes.contains(type);
     }
 
-    private static boolean wasNaturallySpawned(Entity entity) {
+    public static boolean wasNaturallySpawned(Entity entity) {
         DistributedMobSpawns controller = DistributedMobSpawns.getController();
         if (controller.getCountOnlyNaturalSpawned(entity.getWorld())) {
             return entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);

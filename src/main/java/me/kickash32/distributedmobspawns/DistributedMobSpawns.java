@@ -18,7 +18,6 @@ import java.util.Map;
 public final class DistributedMobSpawns extends JavaPlugin {
     private static DistributedMobSpawns controller = null;
     private final boolean isPaperServer = PaperLib.isPaper();
-    public boolean experimental;
     private boolean disabled;
     private Map<World, Integer> mobCapsAnimals;
     private Map<World, Integer> mobCapsMonsters;
@@ -57,7 +56,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.loadConfig();
 
         this.processor = new EntityProcessor(this);
-        if (false&&PaperLib.isPaper()) { this.listener = new EventListenerPaper(this, processor); }
+        if (PaperLib.isPaper()) { this.listener = new EventListenerPaper(this, processor); }
         else { this.listener = new EventListener(this, processor); }
 
         this.getServer().getPluginManager().registerEvents(this.listener, this);
@@ -72,7 +71,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
         if (DistributedMobSpawns.controller == null) { DistributedMobSpawns.controller = this; }
     }
 
-    void loadConfig() {
+    private void loadConfig() {
         FileConfiguration config = this.getConfig();
         this.saveDefaultConfig();
 
@@ -118,7 +117,6 @@ public final class DistributedMobSpawns extends JavaPlugin {
         System.out.println("[DMS] Counting only naturally spawned mobs: " + countOnlyNaturalSpawnedDefault);
 
         this.countUpdatePeriod = config.getInt("countUpdatePeriod", 20);
-        this.experimental = config.getBoolean("experimentalFeatures", false);
 
         if (config.getBoolean("adjust-spawn-limits-for-range", false)) { this.adjustLimits(); }
         else { this.adjustCaps(); }

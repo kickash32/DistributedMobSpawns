@@ -25,10 +25,17 @@ public class EventListenerPaper implements Listener {
     //ENTITY EVENTS
     @EventHandler
     public void onPreCreatureSpawnEvent(PreCreatureSpawnEvent event) {
-        if (event.getReason() != CreatureSpawnEvent.SpawnReason.NATURAL) {
-            return;
-        }
+        if (event.getReason() != CreatureSpawnEvent.SpawnReason.NATURAL) { return; }
+
         boolean success = this.entityProcessor.isSpawnAllowed(event.getSpawnLocation(), event.getType());
         event.setShouldAbortSpawn(!success);
+    }
+
+    @EventHandler
+    public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
+        if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL) { return; }
+
+        boolean success = this.entityProcessor.isSpawnAllowed(event.getLocation(), event.getEntityType());
+        event.setCancelled(!success);
     }
 }

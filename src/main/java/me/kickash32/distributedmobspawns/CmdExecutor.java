@@ -10,6 +10,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
+    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String s, String[] args) {
         if(args.length == 0){ return false; }
         String subCmd = args[0].toLowerCase();
 
@@ -64,26 +65,26 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
         switch (args[1].toLowerCase()){
             case "animals":
                 entityList.stream()
-                        .filter(entity -> Util.isNaturallySpawningAnimal(entity))
-                        .forEach(entity -> entity.remove());
+                        .filter(Util::isNaturallySpawningAnimal)
+                        .forEach(Entity::remove);
                 sender.sendMessage("Successfully killed all animals");
                 break;
             case "monsters":
                 entityList.stream()
-                        .filter(entity -> Util.isNaturallySpawningMonster(entity))
-                        .forEach(entity -> entity.remove());
+                        .filter(Util::isNaturallySpawningMonster)
+                        .forEach(Entity::remove);
                 sender.sendMessage("Successfully killed all monsters");
                 break;
             case "ambients":
                 entityList.stream()
-                        .filter(entity -> Util.isNaturallySpawningAmbient(entity))
-                        .forEach(entity -> entity.remove());
+                        .filter(Util::isNaturallySpawningAmbient)
+                        .forEach(Entity::remove);
                 sender.sendMessage("Successfully killed all ambient mobs");
                 break;
             case "watermobs":
                 entityList.stream()
-                        .filter(entity -> Util.isNaturallySpawningWatermob(entity))
-                        .forEach(entity -> entity.remove());
+                        .filter(Util::isNaturallySpawningWatermob)
+                        .forEach(Entity::remove);
                 sender.sendMessage("Successfully killed all watermobs");
                 break;
             case "all":
@@ -92,7 +93,7 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
                                 Util.isNaturallySpawningMonster(entity)||
                                 Util.isNaturallySpawningAmbient(entity)||
                                 Util.isNaturallySpawningWatermob(entity))
-                        .forEach(entity -> entity.remove());
+                        .forEach(Entity::remove);
                 sender.sendMessage("Successfully killed all mobs");
                 break;
             default:
@@ -161,16 +162,16 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
                 List<Entity> playerEntities = player.getNearbyEntities(radius, radius, radius);
 
                 playerAnimalCount = playerEntities.stream()
-                        .filter(entity -> Util.isNaturallySpawningAnimal(entity))
+                        .filter(Util::isNaturallySpawningAnimal)
                         .count();
                 playerMonsterCount = playerEntities.stream()
-                        .filter(entity -> Util.isNaturallySpawningMonster(entity))
+                        .filter(Util::isNaturallySpawningMonster)
                         .count();
                 playerAmbientCount = playerEntities.stream()
-                        .filter(entity -> Util.isNaturallySpawningAmbient(entity))
+                        .filter(Util::isNaturallySpawningAmbient)
                         .count();
                 playerWatermobCount = playerEntities.stream()
-                        .filter(entity -> Util.isNaturallySpawningWatermob(entity))
+                        .filter(Util::isNaturallySpawningWatermob)
                         .count();
 
                 playerAnimalLimit = this.controller.getMobCapAnimals(world);
@@ -191,16 +192,16 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
             List<Entity> worldEntities = world.getEntities();
 
             worldAnimalCount = worldEntities.stream()
-                    .filter(entity -> Util.isNaturallySpawningAnimal(entity))
+                    .filter(Util::isNaturallySpawningAnimal)
                     .count();
             worldMonsterCount = worldEntities.stream()
-                    .filter(entity -> Util.isNaturallySpawningMonster(entity))
+                    .filter(Util::isNaturallySpawningMonster)
                     .count();
             worldAmbientCount = worldEntities.stream()
-                    .filter(entity -> Util.isNaturallySpawningAmbient(entity))
+                    .filter(Util::isNaturallySpawningAmbient)
                     .count();
             worldWatermobCount = worldEntities.stream()
-                    .filter(entity -> Util.isNaturallySpawningWatermob(entity))
+                    .filter(Util::isNaturallySpawningWatermob)
                     .count();
 
             msgs.add(String.format("%s %s%s %d/%d %d/%d %d/%d %d/%d", prefix, "Total", separator,
@@ -214,23 +215,25 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, String[] args) {
         List<String> options = new ArrayList<>();
         //TODO rework to be modular
-        if(args.length == 0){
-        }
-        else if(args.length == 1){
-            options.add("butcher");
-            options.add("stats");
-            options.add("help");
-            options.add("toggle");
-        }
-        else if(args.length == 2){
-            options.add("animals");
-            options.add("monsters");
-            options.add("ambient");
-            options.add("watermobs");
-            options.add("all");
+        switch (args.length) {
+            case 0:
+                break;
+            case 1:
+                options.add("butcher");
+                options.add("stats");
+                options.add("help");
+                options.add("toggle");
+                break;
+            case 2:
+                options.add("animals");
+                options.add("monsters");
+                options.add("ambient");
+                options.add("watermobs");
+                options.add("all");
+                break;
         }
 
         options.removeIf(string ->

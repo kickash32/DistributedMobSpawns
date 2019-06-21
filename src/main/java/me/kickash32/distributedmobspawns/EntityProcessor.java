@@ -11,15 +11,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EntityProcessor {
+class EntityProcessor {
 
-    DistributedMobSpawns controller;
+    private DistributedMobSpawns controller;
     private Map<Player, Integer> proximityAnimals;
     private Map<Player, Integer> proximityMonsters;
     private Map<Player, Integer> proximityAmbients;
     private Map<Player, Integer> proximityWatermobs;
 
-    public EntityProcessor(DistributedMobSpawns controller) {
+    EntityProcessor(DistributedMobSpawns controller) {
         this.controller = controller;
         this.proximityAnimals = new HashMap<>();
         this.proximityMonsters = new HashMap<>();
