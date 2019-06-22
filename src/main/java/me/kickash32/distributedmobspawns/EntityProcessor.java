@@ -10,14 +10,15 @@ import org.bukkit.entity.Player;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 class EntityProcessor {
 
     private DistributedMobSpawns controller;
-    private Map<Player, Integer> proximityAnimals;
-    private Map<Player, Integer> proximityMonsters;
-    private Map<Player, Integer> proximityAmbients;
-    private Map<Player, Integer> proximityWatermobs;
+    private Map<UUID, Integer> proximityAnimals;
+    private Map<UUID, Integer> proximityMonsters;
+    private Map<UUID, Integer> proximityAmbients;
+    private Map<UUID, Integer> proximityWatermobs;
 
     EntityProcessor(DistributedMobSpawns controller) {
         this.controller = controller;
@@ -65,19 +66,18 @@ class EntityProcessor {
                 }
             }
         }
-        this.proximityAnimals.put(player, animalCount);
-        this.proximityMonsters.put(player, monsterCount);
-        this.proximityAmbients.put(player, ambientCount);
-        this.proximityWatermobs.put(player, watermobCount);
+        this.proximityAnimals.put(player.getUniqueId(), animalCount);
+        this.proximityMonsters.put(player.getUniqueId(), monsterCount);
+        this.proximityAmbients.put(player.getUniqueId(), ambientCount);
+        this.proximityWatermobs.put(player.getUniqueId(), watermobCount);
     }
 
     boolean allFull(Player player) {
         World world = player.getWorld();
-        return
-                this.proximityAnimals.getOrDefault(player, 0) >= controller.getMobCapAnimals(world) &&
-                        this.proximityMonsters.getOrDefault(player, 0) >= controller.getMobCapMonsters(world) &&
-                        this.proximityAmbients.getOrDefault(player, 0) >= controller.getMobCapAmbient(world) &&
-                        this.proximityWatermobs.getOrDefault(player, 0) >= controller.getMobCapWatermobs(world);
+        return this.proximityAnimals.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapAnimals(world) &&
+                this.proximityMonsters.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapMonsters(world) &&
+                this.proximityAmbients.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapAmbient(world) &&
+                this.proximityWatermobs.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapWatermobs(world);
     }
 
     boolean isSpawnAllowed(Location location, EntityType type) {
@@ -85,7 +85,7 @@ class EntityProcessor {
         World world = location.getWorld();
 
         int mobCap = -1;
-        Map<Player, Integer> proximityMap = null;
+        Map<UUID, Integer> proximityMap = null;
 
         if (Util.isNaturallySpawningAnimal(type)) {
             mobCap = controller.getMobCapAnimals(world);
@@ -104,13 +104,13 @@ class EntityProcessor {
         boolean anyFull = false;
         Collection<Player> nearbyPlayers = Util.getPlayersInSquareRange(location, controller.getSpawnRange(location.getWorld()));
         for (Player player : nearbyPlayers) {
-            if (proximityMap.getOrDefault(player, mobCap) >= mobCap) { anyFull = true; }
+            if (proximityMap.getOrDefault(player.getUniqueId(), mobCap) >= mobCap) { anyFull = true; }
         }
 
         if (anyFull) { return false; }
         else {
             for (Player player : nearbyPlayers) {
-                proximityMap.put(player, proximityMap.getOrDefault(player, mobCap) + 1);
+                proximityMap.put(player.getUniqueId(), proximityMap.getOrDefault(player.getUniqueId(), mobCap) + 1);
             }
             return true;
         }

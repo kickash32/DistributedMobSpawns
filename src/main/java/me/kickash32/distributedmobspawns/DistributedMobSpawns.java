@@ -14,15 +14,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public final class DistributedMobSpawns extends JavaPlugin {
     private static DistributedMobSpawns controller = null;
-    private final boolean isPaperServer = PaperLib.isPaper();
     private boolean disabled;
-    private Map<World, Integer> mobCapsAnimals;
-    private Map<World, Integer> mobCapsMonsters;
-    private Map<World, Integer> mobCapsAmbient;
-    private Map<World, Integer> mobCapsWatermobs;
+    private Map<UUID, Integer> mobCapsAnimals;
+    private Map<UUID, Integer> mobCapsMonsters;
+    private Map<UUID, Integer> mobCapsAmbient;
+    private Map<UUID, Integer> mobCapsWatermobs;
     private Listener listener;
     private CommandExecutor cmdEx;
     private EntityProcessor processor;
@@ -48,10 +48,10 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.spawnRange = new HashMap<>();
         this.countOnlyNaturalSpawned = new HashMap<>();
         for (World world : this.getServer().getWorlds()) {
-            this.mobCapsAnimals.put(world, world.getAnimalSpawnLimit());
-            this.mobCapsMonsters.put(world, world.getMonsterSpawnLimit());
-            this.mobCapsAmbient.put(world, world.getAmbientSpawnLimit());
-            this.mobCapsWatermobs.put(world, world.getWaterAnimalSpawnLimit());
+            this.mobCapsAnimals.put(world.getUID(), world.getAnimalSpawnLimit());
+            this.mobCapsMonsters.put(world.getUID(), world.getMonsterSpawnLimit());
+            this.mobCapsAmbient.put(world.getUID(), world.getAmbientSpawnLimit());
+            this.mobCapsWatermobs.put(world.getUID(), world.getWaterAnimalSpawnLimit());
         }
         this.loadConfig();
 
@@ -154,19 +154,19 @@ public final class DistributedMobSpawns extends JavaPlugin {
             int chunks = Util.chunksInRadius(range);
 
             tmp = (int) (0.0 + chunks * this.getMobCapAnimals(world) / 289);
-            this.mobCapsAnimals.put(world, tmp);
+            this.mobCapsAnimals.put(world.getUID(), tmp);
             System.out.println("[DMS] Set Animals mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
 
             tmp = (int) (0.0 + chunks * this.getMobCapMonsters(world) / 289);
-            this.mobCapsMonsters.put(world, tmp);
+            this.mobCapsMonsters.put(world.getUID(), tmp);
             System.out.println("[DMS] Set Monsters mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
 
             tmp = (int) (0.0 + chunks * this.getMobCapAmbient(world) / 289);
-            this.mobCapsAmbient.put(world, tmp);
+            this.mobCapsAmbient.put(world.getUID(), tmp);
             System.out.println("[DMS] Set Ambient mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
 
             tmp = (int) (0.0 + chunks * this.getMobCapWatermobs(world) / 289);
-            this.mobCapsWatermobs.put(world, tmp);
+            this.mobCapsWatermobs.put(world.getUID(), tmp);
             System.out.println("[DMS] Set Watermobs mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
         }
     }
@@ -181,13 +181,13 @@ public final class DistributedMobSpawns extends JavaPlugin {
         }
     }
 
-    int getMobCapAnimals(World world) { return mobCapsAnimals.get(world); }
+    int getMobCapAnimals(World world) { return mobCapsAnimals.get(world.getUID()); }
 
-    int getMobCapMonsters(World world) { return mobCapsMonsters.get(world); }
+    int getMobCapMonsters(World world) { return mobCapsMonsters.get(world.getUID()); }
 
-    int getMobCapAmbient(World world) { return mobCapsAmbient.get(world); }
+    int getMobCapAmbient(World world) { return mobCapsAmbient.get(world.getUID()); }
 
-    int getMobCapWatermobs(World world) { return mobCapsWatermobs.get(world); }
+    int getMobCapWatermobs(World world) { return mobCapsWatermobs.get(world.getUID()); }
 
     int getSpawnRange(World world) { return spawnRange.getOrDefault(world, spawnRangeDefault); }
 
