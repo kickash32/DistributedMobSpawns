@@ -81,7 +81,6 @@ class EntityProcessor {
     }
 
     boolean isSpawnAllowed(Location location, EntityType type) {
-        //new Exception().printStackTrace();
         World world = location.getWorld();
 
         int mobCap = -1;
