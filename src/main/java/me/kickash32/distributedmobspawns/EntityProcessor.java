@@ -74,7 +74,7 @@ class EntityProcessor {
 
     boolean allFull(Player player) {
         World world = player.getWorld();
-        return this.proximityAnimals.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapAnimals(world) &&
+        return  this.proximityAnimals.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapAnimals(world) &&
                 this.proximityMonsters.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapMonsters(world) &&
                 this.proximityAmbients.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapAmbient(world) &&
                 this.proximityWatermobs.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapWatermobs(world);
@@ -98,6 +98,9 @@ class EntityProcessor {
         } else if (Util.isNaturallySpawningWatermob(type)) {
             mobCap = controller.getMobCapAmbient(world);
             proximityMap = proximityWatermobs;
+        }else {
+            System.out.println("[DMS] Error: unknown mob: " + type);
+            return false; // TODO better error handling
         }
 
         boolean anyFull = false;

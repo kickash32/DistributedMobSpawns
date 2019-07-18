@@ -56,15 +56,13 @@ public final class DistributedMobSpawns extends JavaPlugin {
         this.loadConfig();
 
         this.processor = new EntityProcessor(this);
-        if (PaperLib.isPaper()) { this.listener = new EventListenerPaper(this, processor); }
-        else { this.listener = new EventListener(this, processor); }
+        this.listener = new EventListener(this, processor);
 
         this.getServer().getPluginManager().registerEvents(this.listener, this);
         this.cmdEx = new CmdExecutor(this);
         this.getCommand("dms").setExecutor(cmdEx);
 
         this.disabled = false;
-
         this.getServer().getScheduler().runTaskTimer(
                 this, new UpdateMobCountsTask(this, this.processor), 0, countUpdatePeriod);
 
