@@ -72,19 +72,11 @@ class EntityProcessor {
         this.proximityWatermobs.put(player.getUniqueId(), watermobCount);
     }
 
-    boolean allFull(Player player) {
-        World world = player.getWorld();
-        return  this.proximityAnimals.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapAnimals(world) &&
-                this.proximityMonsters.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapMonsters(world) &&
-                this.proximityAmbients.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapAmbient(world) &&
-                this.proximityWatermobs.getOrDefault(player.getUniqueId(), 0) >= controller.getMobCapWatermobs(world);
-    }
-
     boolean isSpawnAllowed(Location location, EntityType type) {
         World world = location.getWorld();
 
-        int mobCap = -1;
-        Map<UUID, Integer> proximityMap = null;
+        int mobCap;
+        Map<UUID, Integer> proximityMap;
 
         if (Util.isNaturallySpawningAnimal(type)) {
             mobCap = controller.getMobCapAnimals(world);
@@ -98,23 +90,22 @@ class EntityProcessor {
         } else if (Util.isNaturallySpawningWatermob(type)) {
             mobCap = controller.getMobCapAmbient(world);
             proximityMap = proximityWatermobs;
-        }else {
+        } else if (Util.isIgnored(type)) {
+            return true;
+        } else {
             System.out.println("[DMS] Error: unknown mob: " + type);
             return false; // TODO better error handling
         }
 
-        boolean anyFull = false;
         Collection<Player> nearbyPlayers = Util.getPlayersInSquareRange(location, controller.getSpawnRange(location.getWorld()));
         for (Player player : nearbyPlayers) {
-            if (proximityMap.getOrDefault(player.getUniqueId(), mobCap) >= mobCap) { anyFull = true; }
+            if (proximityMap.getOrDefault(player.getUniqueId(), mobCap) >= mobCap) { return false; }
         }
 
-        if (anyFull) { return false; }
-        else {
-            for (Player player : nearbyPlayers) {
-                proximityMap.put(player.getUniqueId(), proximityMap.getOrDefault(player.getUniqueId(), mobCap) + 1);
-            }
-            return true;
+        // Spawning is allowed
+        for (Player player : nearbyPlayers) {
+            proximityMap.put(player.getUniqueId(), proximityMap.getOrDefault(player.getUniqueId(), mobCap) + 1);
         }
+        return true;
     }
 }

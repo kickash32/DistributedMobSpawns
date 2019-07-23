@@ -14,21 +14,19 @@ import org.bukkit.entity.WaterMob;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-
 
 public class Util {
     private static Set<EntityType> animalTypes = generateAnimalTypes();
     private static Set<EntityType> monsterTypes = generateMonsterTypes();
     private static Set<EntityType> ambientTypes = generateAmbientTypes();
     private static Set<EntityType> watermobTypes = generateWatermobTypes();
+    private static Set<EntityType> ignoredMobTypes = generateIgnoredMobTypes();
 
     private static Set<EntityType> generateAnimalTypes() {
-        Set<EntityType> result = new HashSet<>();
+        Set<EntityType> result = EnumSet.noneOf(EntityType.class);
         for (EntityType type : EntityType.values()) {
             Class c = type.getEntityClass();
             if (c != null &&
@@ -40,7 +38,7 @@ public class Util {
     }
 
     private static Set<EntityType> generateMonsterTypes() {
-        Set<EntityType> result = new HashSet<>();
+        Set<EntityType> result = EnumSet.noneOf(EntityType.class);
         for (EntityType type : EntityType.values()) {
             Class c = type.getEntityClass();
             if (c != null && (
@@ -54,7 +52,7 @@ public class Util {
     }
 
     private static Set<EntityType> generateAmbientTypes() {
-        Set<EntityType> result = new HashSet<>();
+        Set<EntityType> result = EnumSet.noneOf(EntityType.class);
         for (EntityType type : EntityType.values()) {
             Class c = type.getEntityClass();
             if (c != null &&
@@ -66,7 +64,7 @@ public class Util {
     }
 
     private static Set<EntityType> generateWatermobTypes() {
-        Set<EntityType> result = new HashSet<>();
+        Set<EntityType> result = EnumSet.noneOf(EntityType.class);
         for (EntityType type : EntityType.values()) {
             Class c = type.getEntityClass();
             if (c != null &&
@@ -77,40 +75,33 @@ public class Util {
         return result;
     }
 
-    public static List<Player> getNearbyPlayers(Location loc, int distance) {
-        int distanceSquared = distance * distance;
-
-        List<Player> list = new ArrayList<>();
-        for (Player player : loc.getWorld().getPlayers()) {
-            if (player.getGameMode().equals(GameMode.SPECTATOR)) {
-                continue;
-            }
-            if (player.getLocation().distanceSquared(loc) < distanceSquared) {
-                list.add(player);
-            }
+    private static Set<EntityType> generateIgnoredMobTypes() {
+        Set<EntityType> result = EnumSet.noneOf(EntityType.class);
+        try{
+            result.add(EntityType.valueOf("PHANTOM"));
+        } catch(IllegalArgumentException ex){
+            System.out.println(ex.getMessage());
         }
-        return list;
+        return result;
     }
 
-    public static Collection<Player> getPlayersInSquareRange(Location location, int rangeChunks) {
-        int range = rangeChunks * 17;
+    public static List<Player> getPlayersInSquareRange(Location location, int rangeChunks) {
+        int range = rangeChunks * 16;
 
-        Collection<Player> playerCollection = getNearbyPlayers(location, rangeChunks * 23);
+        List<Player> players = location.getWorld().getPlayers();
+        List<Player> filteredPlayers = new ArrayList<>();
 
-        Iterator<Player> iterator = playerCollection.iterator();
-        Player player;
         Location playerLocation;
-        while (iterator.hasNext()) {
-            player = iterator.next();
+        for(Player player : players){
             playerLocation = player.getLocation();
 
-            if (Math.abs(playerLocation.getBlockX() - location.getBlockX()) < range &&
-                    Math.abs(playerLocation.getBlockZ() - location.getBlockZ()) < range) {
-            } else {
-                iterator.remove();
+        if (player.getGameMode() == GameMode.SPECTATOR ||
+                    !(Math.abs(playerLocation.getBlockX() - location.getBlockX()) < range &&
+                      Math.abs(playerLocation.getBlockZ() - location.getBlockZ()) < range)) {
+            filteredPlayers.add(player);
             }
         }
-        return playerCollection;
+        return filteredPlayers;
     }
 
     public static int chunksInRadius(int radius) {
@@ -118,31 +109,19 @@ public class Util {
     }
 
     public static boolean isNaturallySpawningAnimal(Entity entity) {
-        if (entity == null) {
-            return false;
-        }
-        return animalTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+        return isNaturallySpawningAnimal(entity.getType()) && wasNaturallySpawned(entity);
     }
 
     public static boolean isNaturallySpawningMonster(Entity entity) {
-        if (entity == null) {
-            return false;
-        }
-        return monsterTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+        return isNaturallySpawningMonster(entity.getType()) && wasNaturallySpawned(entity);
     }
 
     public static boolean isNaturallySpawningAmbient(Entity entity) {
-        if (entity == null) {
-            return false;
-        }
-        return ambientTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+        return isNaturallySpawningAmbient(entity.getType()) && wasNaturallySpawned(entity);
     }
 
     public static boolean isNaturallySpawningWatermob(Entity entity) {
-        if (entity == null) {
-            return false;
-        }
-        return watermobTypes.contains(entity.getType()) && wasNaturallySpawned(entity);
+        return isNaturallySpawningWatermob(entity.getType()) && wasNaturallySpawned(entity);
     }
 
     public static boolean isNaturallySpawningAnimal(EntityType type) {
@@ -159,6 +138,14 @@ public class Util {
 
     public static boolean isNaturallySpawningWatermob(EntityType type) {
         return watermobTypes.contains(type);
+    }
+
+    public static boolean isIgnored(Entity entity) {
+        return isIgnored(entity.getType());
+    }
+
+    public static boolean isIgnored(EntityType type) {
+        return ignoredMobTypes.contains(type);
     }
 
     public static boolean wasNaturallySpawned(Entity entity) {

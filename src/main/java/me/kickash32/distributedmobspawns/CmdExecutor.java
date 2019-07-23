@@ -61,6 +61,7 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
                 entityList.addAll(world.getEntities());
             }
         }
+        entityList.removeIf(entity -> entity.getCustomName() != null);
 
         switch (args[1].toLowerCase()){
             case "animals":
@@ -159,18 +160,18 @@ public class CmdExecutor implements CommandExecutor, TabCompleter, TabExecutor {
             worldWatermobLimit = 0;
 
             for(Player player : world.getPlayers()){
-                List<Entity> playerEntities = player.getNearbyEntities(radius, radius, radius);
+                List<Entity> nearbyEntities = player.getNearbyEntities(radius, radius, radius);
 
-                playerAnimalCount = playerEntities.stream()
+                playerAnimalCount = nearbyEntities.stream()
                         .filter(Util::isNaturallySpawningAnimal)
                         .count();
-                playerMonsterCount = playerEntities.stream()
+                playerMonsterCount = nearbyEntities.stream()
                         .filter(Util::isNaturallySpawningMonster)
                         .count();
-                playerAmbientCount = playerEntities.stream()
+                playerAmbientCount = nearbyEntities.stream()
                         .filter(Util::isNaturallySpawningAmbient)
                         .count();
-                playerWatermobCount = playerEntities.stream()
+                playerWatermobCount = nearbyEntities.stream()
                         .filter(Util::isNaturallySpawningWatermob)
                         .count();
 
