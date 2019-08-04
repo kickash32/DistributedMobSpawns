@@ -29,7 +29,7 @@ class EntityProcessor {
 
     void update(Player player) {
         UUID playerID = player.getUniqueId();
-        int radius = controller.getSpawnRange(player.getWorld())*16;
+        int radius = controller.getSpawnRange(player.getWorld()) * 16;
         Location loc = player.getLocation();
 
         int animalCount = 0;

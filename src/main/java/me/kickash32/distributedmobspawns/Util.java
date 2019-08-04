@@ -95,9 +95,9 @@ public class Util {
         for(Player player : players){
             playerLocation = player.getLocation();
 
-        if (player.getGameMode() == GameMode.SPECTATOR ||
-                    !(Math.abs(playerLocation.getBlockX() - location.getBlockX()) < range &&
-                      Math.abs(playerLocation.getBlockZ() - location.getBlockZ()) < range)) {
+        if (player.getGameMode() != GameMode.SPECTATOR && player.getAffectsSpawning() &&
+                Math.abs(playerLocation.getBlockX() - location.getBlockX()) < range &&
+                Math.abs(playerLocation.getBlockZ() - location.getBlockZ()) < range) {
             filteredPlayers.add(player);
             }
         }
@@ -151,9 +151,13 @@ public class Util {
     public static boolean wasNaturallySpawned(Entity entity) {
         DistributedMobSpawns controller = DistributedMobSpawns.getController();
         if (controller.getCountOnlyNaturalSpawned(entity.getWorld())) {
-            return entity.getEntitySpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL);
+            return entity.getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL;
         } else {
             return true;
         }
+    }
+
+    public static int limit (int min, int max, int value){
+        return (value > max) ? max : (value < min ? min: value );
     }
 }

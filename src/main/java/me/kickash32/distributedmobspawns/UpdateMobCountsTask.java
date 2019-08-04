@@ -17,7 +17,7 @@ public class UpdateMobCountsTask implements Runnable {
         if (controller.isDisabled()) { return; }
 
         for (Player player : controller.getServer().getOnlinePlayers()) {
-            if (player.getGameMode() != GameMode.SPECTATOR) {
+            if (player.getGameMode() != GameMode.SPECTATOR && player.getAffectsSpawning()) {
                 entityProcessor.update(player);
             }
         }
