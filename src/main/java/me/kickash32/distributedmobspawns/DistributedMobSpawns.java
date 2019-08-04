@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class DistributedMobSpawns extends JavaPlugin {
-    private static DistributedMobSpawns controller = null;
+    private static DistributedMobSpawns controller;
     private boolean disabled;
     private Map<UUID, Integer> mobCapsAnimals;
     private Map<UUID, Integer> mobCapsMonsters;
@@ -31,6 +31,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
     private int spawnRangeDefault;
     private boolean countOnlyNaturalSpawnedDefault;
     private int countUpdatePeriod;
+    private boolean verbose;
 
     public static DistributedMobSpawns getController() {
         return DistributedMobSpawns.controller;
@@ -71,7 +72,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
     private void loadConfig() {
         FileConfiguration config = this.getConfig();
-        this.saveDefaultConfig();
+        verbose = config.getBoolean("verbose", false);
 
         if (PaperLib.isSpigot()) {
             try {
@@ -86,7 +87,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
                     int tmpInt = spigotSection.getConfigurationSection(worldName)
                             .getInt("mob-spawn-range");
-                    this.spawnRange.put(getServer().getWorld(worldName), tmpInt);
+                    this.spawnRange.put(getServer().getWorld(worldName), Util.limit(3, getServer().getViewDistance(), tmpInt)); // TODO per world view dist
                 }
             }
             catch (IOException | InvalidConfigurationException e) { e.printStackTrace(); }
@@ -99,25 +100,38 @@ public final class DistributedMobSpawns extends JavaPlugin {
                 paperConfig.load("paper.yml");
 
                 ConfigurationSection paperSection = paperConfig.getConfigurationSection("world-settings");
-                this.countOnlyNaturalSpawnedDefault = paperSection.getConfigurationSection("default")
+                this.countOnlyNaturalSpawnedDefault = !paperSection.getConfigurationSection("default")
                         .getBoolean("count-all-mobs-for-spawning");
                 for (String worldName : paperSection.getKeys(false)) {
                     if (worldName.equals("default")) { continue; }
 
                     boolean tmpBool = !paperSection.getConfigurationSection(worldName)
                             .getBoolean("count-all-mobs-for-spawning");
-                    this.countOnlyNaturalSpawned.put(getServer().getWorld(worldName), tmpBool);
+                    this.countOnlyNaturalSpawned.put(getServer().getWorld(worldName), tmpBool); //TODO test this actually works
                 }
             }
             catch (IOException | InvalidConfigurationException e) { e.printStackTrace(); }
         }
         else { this.countOnlyNaturalSpawnedDefault = false; }
-        System.out.println("[DMS] Counting only naturally spawned mobs: " + countOnlyNaturalSpawnedDefault);
+//        System.out.println("[DMS] Counting only naturally spawned mobs: " + countOnlyNaturalSpawnedDefault);
 
         this.countUpdatePeriod = config.getInt("countUpdatePeriod", 20);
 
         if (config.getBoolean("adjust-spawn-limits-for-range", false)) { this.adjustLimits(); }
         else { this.adjustCaps(); }
+
+        if (verbose) {
+            for(World world : this.getServer().getWorlds()){
+                System.out.println("[DMS] ["+world.getName()+"] "+
+                        "mob-spawn-range/count-natural-mobs-only: "+ getSpawnRange(world)+'/'+getCountOnlyNaturalSpawned(world) + " "+
+                        "Animal limit/cap: "+ getMobCapAnimals(world)+'/'+world.getAnimalSpawnLimit() + " "+
+                        "Monster limit/cap: "+ getMobCapMonsters(world)+'/'+world.getMonsterSpawnLimit() + " "+
+                        "Ambient limit/cap: "+ getMobCapAmbient(world)+'/'+world.getAmbientSpawnLimit() + " "+
+                        "Watermob limit/cap: "+ getMobCapWatermobs(world)+'/'+world.getWaterAnimalSpawnLimit() + " "
+                );
+            }
+        }
+        this.saveDefaultConfig();
     }
 
     private void adjustLimits() {
@@ -127,19 +141,19 @@ public final class DistributedMobSpawns extends JavaPlugin {
             int chunks = Util.chunksInRadius(range);
 
             tmp = (int) (0.0 + this.getMobCapAnimals(world) * 289 / chunks);
-            System.out.println("[DMS] Set Animal limit to: " + tmp + " was: " + getMobCapAnimals(world) + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Animal limit to: " + tmp + " was: " + getMobCapAnimals(world) + " with radius: " + range + " in " + world.getName());
             world.setAnimalSpawnLimit(tmp);
 
             tmp = (int) (0.0 + this.getMobCapMonsters(world) * 289 / chunks);
-            System.out.println("[DMS] Set Monster limit to: " + tmp + " was: " + getMobCapMonsters(world) + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Monster limit to: " + tmp + " was: " + getMobCapMonsters(world) + " with radius: " + range + " in " + world.getName());
             world.setMonsterSpawnLimit(tmp);
 
             tmp = (int) (0.0 + this.getMobCapAmbient(world) * 289 / chunks);
-            System.out.println("[DMS] Set Ambient limit to: " + tmp + " was: " + getMobCapAmbient(world) + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Ambient limit to: " + tmp + " was: " + getMobCapAmbient(world) + " with radius: " + range + " in " + world.getName());
             world.setAmbientSpawnLimit(tmp);
 
             tmp = (int) (0.0 + this.getMobCapWatermobs(world) * 289 / chunks);
-            System.out.println("[DMS] Set Watermobs limit to: " + tmp + " was: " + getMobCapWatermobs(world) + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Watermobs limit to: " + tmp + " was: " + getMobCapWatermobs(world) + " with radius: " + range + " in " + world.getName());
             world.setWaterAnimalSpawnLimit(tmp);
 
         }
@@ -153,19 +167,19 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
             tmp = (int) (0.0 + chunks * this.getMobCapAnimals(world) / 289);
             this.mobCapsAnimals.put(world.getUID(), tmp);
-            System.out.println("[DMS] Set Animals mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Animals mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
 
             tmp = (int) (0.0 + chunks * this.getMobCapMonsters(world) / 289);
             this.mobCapsMonsters.put(world.getUID(), tmp);
-            System.out.println("[DMS] Set Monsters mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Monsters mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
 
             tmp = (int) (0.0 + chunks * this.getMobCapAmbient(world) / 289);
             this.mobCapsAmbient.put(world.getUID(), tmp);
-            System.out.println("[DMS] Set Ambient mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Ambient mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
 
             tmp = (int) (0.0 + chunks * this.getMobCapWatermobs(world) / 289);
             this.mobCapsWatermobs.put(world.getUID(), tmp);
-            System.out.println("[DMS] Set Watermobs mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
+//            System.out.println("[DMS] Set Watermobs mobcap to: " + tmp + " with radius: " + range + " in " + world.getName());
         }
     }
 
