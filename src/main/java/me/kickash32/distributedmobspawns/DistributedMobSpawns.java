@@ -26,8 +26,8 @@ public final class DistributedMobSpawns extends JavaPlugin {
     private Listener listener;
     private CommandExecutor cmdEx;
     private EntityProcessor processor;
-    private Map<World, Integer> spawnRange;
-    private Map<World, Boolean> countOnlyNaturalSpawned;
+    private Map<UUID, Integer> spawnRange;
+    private Map<UUID, Boolean> countOnlyNaturalSpawned;
     private int spawnRangeDefault;
     private boolean countOnlyNaturalSpawnedDefault;
     private int countUpdatePeriod;
@@ -87,7 +87,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
                     int tmpInt = spigotSection.getConfigurationSection(worldName)
                             .getInt("mob-spawn-range");
-                    this.spawnRange.put(getServer().getWorld(worldName), Util.limit(3, getServer().getViewDistance(), tmpInt)); // TODO per world view dist
+                    this.spawnRange.put(getServer().getWorld(worldName).getUID(), Util.limit(3, getServer().getViewDistance(), tmpInt)); // TODO per world view dist
                 }
             }
             catch (IOException | InvalidConfigurationException e) { e.printStackTrace(); }
@@ -107,7 +107,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
                     boolean tmpBool = !paperSection.getConfigurationSection(worldName)
                             .getBoolean("count-all-mobs-for-spawning");
-                    this.countOnlyNaturalSpawned.put(getServer().getWorld(worldName), tmpBool); //TODO test this actually works
+                    this.countOnlyNaturalSpawned.put(getServer().getWorld(worldName).getUID(), tmpBool); //TODO test this actually works
                 }
             }
             catch (IOException | InvalidConfigurationException e) { e.printStackTrace(); }
@@ -193,19 +193,39 @@ public final class DistributedMobSpawns extends JavaPlugin {
         }
     }
 
-    int getMobCapAnimals(World world) { return mobCapsAnimals.get(world.getUID()); }
+    int getMobCapAnimals(World world) {
+        UUID id = world.getUID();
+        return mobCapsAnimals.get(id);
+    }
 
-    int getMobCapMonsters(World world) { return mobCapsMonsters.get(world.getUID()); }
+    int getMobCapMonsters(World world) {
+        UUID id = world.getUID();
+        return mobCapsMonsters.get(id);
+    }
 
-    int getMobCapAmbient(World world) { return mobCapsAmbient.get(world.getUID()); }
+    int getMobCapAmbient(World world) {
+        UUID id = world.getUID();
+        return mobCapsAmbient.get(id);
+    }
 
-    int getMobCapWatermobs(World world) { return mobCapsWatermobs.get(world.getUID()); }
+    int getMobCapWatermobs(World world) {
+        UUID id = world.getUID();
+        return mobCapsWatermobs.get(id);
+    }
 
-    int getSpawnRange(World world) { return spawnRange.getOrDefault(world, spawnRangeDefault); }
+    int getSpawnRange(World world) {
+        UUID id = world.getUID();
+        return spawnRange.getOrDefault(id, spawnRangeDefault);
+    }
 
-    boolean getCountOnlyNaturalSpawned(World world) { return this.countOnlyNaturalSpawned.getOrDefault(world, countOnlyNaturalSpawnedDefault); }
+    boolean getCountOnlyNaturalSpawned(World world) {
+        UUID id = world.getUID();
+        return this.countOnlyNaturalSpawned.getOrDefault(id, countOnlyNaturalSpawnedDefault);
+    }
 
-    boolean isDisabled() { return disabled; }
+    boolean isDisabled() {
+        return disabled;
+    }
 
     boolean toggleDisabled() {
         disabled = !disabled;
