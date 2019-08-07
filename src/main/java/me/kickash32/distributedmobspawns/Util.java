@@ -158,6 +158,11 @@ public class Util {
     }
 
     public static int limit (int min, int max, int value){
+        if (min > max) {
+            int tmp = max;
+            max = min;
+            min = tmp;
+        }
         return (value > max) ? max : (value < min ? min: value );
     }
 }

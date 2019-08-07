@@ -185,6 +185,7 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        HandlerList.unregisterAll(this.listener);
         for (World world : this.getServer().getWorlds()) {
             world.setAnimalSpawnLimit(this.getMobCapAnimals(world));
             world.setMonsterSpawnLimit(this.getMobCapMonsters(world));
