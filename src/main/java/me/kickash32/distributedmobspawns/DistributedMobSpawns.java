@@ -81,32 +81,33 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
                 ConfigurationSection spigotSection = spigotConfig.getConfigurationSection("world-settings");
                 this.spawnRangeDefault = spigotSection.getConfigurationSection("default")
-                        .getInt("mob-spawn-range");
+                        .getInt("mob-spawn-range", 8);
+                this.spawnRangeDefault = Util.limit(0, 8, spawnRangeDefault);
                 for (String worldName : spigotSection.getKeys(false)) {
                     if (worldName.equals("default")) { continue; }
 
                     int tmpInt = spigotSection.getConfigurationSection(worldName)
-                            .getInt("mob-spawn-range");
-                    this.spawnRange.put(getServer().getWorld(worldName).getUID(), Util.limit(3, getServer().getViewDistance(), tmpInt)); // TODO per world view dist
+                            .getInt("mob-spawn-range", spawnRangeDefault);
+                    this.spawnRange.put(getServer().getWorld(worldName).getUID(), Util.limit(0, 8, tmpInt));
                 }
             }
             catch (IOException | InvalidConfigurationException e) { e.printStackTrace(); }
         }
         else { this.spawnRangeDefault = 8; }
 
-        if (PaperLib.isPaper()) {
+        if (PaperLib.isPaper() && PaperLib.getMinecraftVersion() >= 13) {
             try {
                 YamlConfiguration paperConfig = new YamlConfiguration();
                 paperConfig.load("paper.yml");
 
                 ConfigurationSection paperSection = paperConfig.getConfigurationSection("world-settings");
                 this.countOnlyNaturalSpawnedDefault = !paperSection.getConfigurationSection("default")
-                        .getBoolean("count-all-mobs-for-spawning");
+                        .getBoolean("count-all-mobs-for-spawning", true);
                 for (String worldName : paperSection.getKeys(false)) {
                     if (worldName.equals("default")) { continue; }
 
                     boolean tmpBool = !paperSection.getConfigurationSection(worldName)
-                            .getBoolean("count-all-mobs-for-spawning");
+                            .getBoolean("count-all-mobs-for-spawning", true);
                     this.countOnlyNaturalSpawned.put(getServer().getWorld(worldName).getUID(), tmpBool); //TODO test this actually works
                 }
             }
