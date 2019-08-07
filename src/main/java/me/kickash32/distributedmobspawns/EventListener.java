@@ -3,6 +3,9 @@ package me.kickash32.distributedmobspawns;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.world.WorldLoadEvent;
+
+import java.util.logging.Level;
 
 
 public class EventListener implements Listener {
@@ -22,5 +25,12 @@ public class EventListener implements Listener {
 
         boolean allowed = this.entityProcessor.isSpawnAllowed(event.getLocation(), event.getEntityType());
         event.setCancelled(!allowed);
+    }
+
+    //WORLD EVENTS
+    @EventHandler
+    public void onWorldLoad(WorldLoadEvent event) {
+        controller.getServer().getLogger().log(Level.SEVERE, "[DMS] World loaded after startup unsupported!!!");
+        controller.getServer().getLogger().log(Level.SEVERE, "[DMS] Restart the server to re-enable plugin");
     }
 }
