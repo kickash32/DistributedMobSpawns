@@ -30,13 +30,12 @@ class EntityProcessor {
     void update(Player player) {
         UUID playerID = player.getUniqueId();
         int radius = controller.getSpawnRange(player.getWorld()) * 16;
-        Location loc = player.getLocation();
 
         int animalCount = 0;
         int monsterCount = 0;
         int ambientCount = 0;
         int watermobCount = 0;
-        for(Entity entity: loc.getNearbyLivingEntities(radius)){
+        for(Entity entity: player.getWorld().getNearbyEntities(player.getLocation(), radius, 256, radius)){
             if (Util.isNaturallySpawningAnimal(entity)) { animalCount++; }
             else if (Util.isNaturallySpawningMonster(entity)) { monsterCount++; }
             else if (Util.isNaturallySpawningAmbient(entity)) { ambientCount++; }

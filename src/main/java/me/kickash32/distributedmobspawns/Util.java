@@ -1,5 +1,6 @@
 package me.kickash32.distributedmobspawns;
 
+import io.papermc.lib.PaperLib;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Ambient;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Util {
+    private static boolean isPaper = PaperLib.isPaper();
     private static Set<EntityType> animalTypes = generateAnimalTypes();
     private static Set<EntityType> monsterTypes = generateMonsterTypes();
     private static Set<EntityType> ambientTypes = generateAmbientTypes();
@@ -95,7 +97,7 @@ public class Util {
         for(Player player : players){
             playerLocation = player.getLocation();
 
-        if (player.getGameMode() != GameMode.SPECTATOR && player.getAffectsSpawning() &&
+        if (player.getGameMode() != GameMode.SPECTATOR && (!isPaper || player.getAffectsSpawning()) &&
                 Math.abs(playerLocation.getBlockX() - location.getBlockX()) < range &&
                 Math.abs(playerLocation.getBlockZ() - location.getBlockZ()) < range) {
             filteredPlayers.add(player);
