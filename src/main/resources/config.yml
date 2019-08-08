@@ -1,7 +1,10 @@
-# adjust-spawn-limits-for-range should be set to true if the number of monsters per player should be independent of range
-# (in spigot and paper by default it is lower if mob-spawn-range is not 8)
+# adjust-spawn-limits-for-range: should be set to true if the number of monsters per player should be independent of range
+#   (in spigot and paper by default it is lower if mob-spawn-range lower than 8)
 adjust-spawn-limits-for-range: false
-#countUpdatePeriod is the period(ticks) in which mob counts are updated
-#increase to compensate for lag, decrease to increase mob spawning responsiveness
+# countUpdatePeriod: the period(ticks) in which mob counts are updated
+#   increase to compensate for lag, decrease to increase mob spawning responsiveness
 countUpdatePeriod: 20
 verbose: false
+# mob limits are in bukkit.yml
+# mob-spawn-range in spigot.yml
+# also check out count-all-mobs in paper.yml
