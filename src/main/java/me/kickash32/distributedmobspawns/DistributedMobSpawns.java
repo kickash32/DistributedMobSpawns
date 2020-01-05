@@ -86,9 +86,12 @@ public final class DistributedMobSpawns extends JavaPlugin {
                 for (String worldName : spigotSection.getKeys(false)) {
                     if (worldName.equals("default")) { continue; }
 
-                    int tmpInt = spigotSection.getConfigurationSection(worldName)
+                    ConfigurationSection section = spigotSection.getConfigurationSection(worldName);
+                    int tmpInt = section
                             .getInt("mob-spawn-range", spawnRangeDefault);
-                    this.spawnRange.put(getServer().getWorld(worldName).getUID(), Util.limit(0, 8, tmpInt));
+                    World world = getServer().getWorld(worldName);
+                    if (world == null) continue;
+                    this.spawnRange.put(world.getUID(), Util.limit(0, 8, tmpInt));
                 }
             }
             catch (IOException | InvalidConfigurationException e) { e.printStackTrace(); }
@@ -108,7 +111,9 @@ public final class DistributedMobSpawns extends JavaPlugin {
 
                     boolean tmpBool = !paperSection.getConfigurationSection(worldName)
                             .getBoolean("count-all-mobs-for-spawning", true);
-                    this.countOnlyNaturalSpawned.put(getServer().getWorld(worldName).getUID(), tmpBool); //TODO test this actually works
+                    World world = getServer().getWorld(worldName);
+                    if (world == null) continue;
+                    this.countOnlyNaturalSpawned.put(world.getUID(), tmpBool);
                 }
             }
             catch (IOException | InvalidConfigurationException e) { e.printStackTrace(); }
